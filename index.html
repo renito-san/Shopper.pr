@@ -750,6 +750,78 @@
         .send svg{fill:#0B1F12}
         .ask-pill{box-shadow:0 10px 30px rgba(0,0,0,.35)}
       }
+
+      /* ===== Comparar — TABLA HORIZONTAL deslizable + selector de productos =====
+         La comparación ya no es una lista vertical: es una tabla que se
+         mueve PA'L LADO dentro de su propio contenedor (la página nunca
+         scrollea horizontal). La columna del producto queda congelada a
+         la izquierda (position:sticky) y las columnas de tiendas se
+         deslizan con scroll-snap suave. Los encabezados de tienda llevan
+         el pastel de cada tienda, como las pastillas. */
+      .cmp-picker{margin:0 0 20px}
+      .cmp-picker h3{margin:0 0 4px;font-size:1.22rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+      .cmp-picker .cmp-picker-sub{margin:0 0 14px;font-size:.86rem;color:var(--ink-soft);line-height:1.55;max-width:52ch}
+      .cmp-chips{display:flex;flex-wrap:wrap;gap:8px}
+      .cmp-chip{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:.88rem;font-weight:600;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow-sm)}
+      .cmp-chip small{font-weight:600;font-size:.74rem;color:var(--ink-faint)}
+      .cmp-chip:active{transform:scale(.98)}
+      .cmp-chip[aria-pressed="true"]{background:var(--amber-bright);border-color:var(--amber-bright);color:#fff;box-shadow:none}
+      .cmp-chip[aria-pressed="true"] small{color:inherit;opacity:.8}
+      @media(prefers-color-scheme:dark){.cmp-chip[aria-pressed="true"]{color:#0B1F12}}
+      .cmp-picker-actions{display:flex;gap:18px;margin-top:6px}
+      .cmp-mini-btn{border:none;background:transparent;color:var(--ink-soft);font-weight:700;font-size:.83rem;padding:8px 2px;min-height:40px}
+      .cmp-mini-btn:active{color:var(--amber-strong)}
+      .cmp-dropped{border:1px solid var(--line);border-radius:14px;background:var(--amber-soft);color:var(--amber-ink);padding:10px 12px;font-size:.84rem;line-height:1.5;margin:0 0 12px}
+      .cmp-scroll-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 0 10px}
+      .cmp-scroll-title{font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
+      .cmp-swipe-hint{font-size:.78rem;font-weight:700;color:var(--ink-faint);white-space:nowrap}
+      .cmp-scroll-wrap{position:relative;margin-bottom:20px}
+      .cmp-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:none;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-sm)}
+      .cmp-scroll::-webkit-scrollbar{display:none}
+      .cmp-fade{position:absolute;top:1px;right:1px;bottom:1px;width:44px;border-radius:0 20px 20px 0;background:linear-gradient(to right,transparent,var(--surface));pointer-events:none;opacity:1;transition:opacity .25s ease}
+      .cmp-scroll-wrap.at-end .cmp-fade{opacity:0}
+      @media(prefers-reduced-motion:reduce){.cmp-fade{transition:none}}
+      table.cmp-table{border-collapse:separate;border-spacing:0;min-width:100%}
+      .cmp-table th,.cmp-table td{padding:15px 16px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left;min-width:150px;scroll-snap-align:start}
+      .cmp-table tbody tr:last-child td,.cmp-table tbody tr:last-child th{border-bottom:none}
+      .cmp-table .cmp-prod{position:sticky;left:0;z-index:2;min-width:148px;width:148px;max-width:148px;background:var(--surface);box-shadow:6px 0 10px -6px rgba(28,36,32,.25)}
+      .cmp-table thead .cmp-prod{z-index:3}
+      .cmp-table .cmp-prod .p-label{font-weight:800;font-size:.95rem;line-height:1.3;letter-spacing:-.01em}
+      .cmp-table .cmp-prod .p-pres{font-size:.75rem;color:var(--ink-soft);line-height:1.45;margin-top:3px}
+      .cmp-table .cmp-prod .p-cov{font-size:.74rem;font-weight:600;color:var(--ink-faint);margin-top:5px}
+      .cmp-table thead th{font-size:.92rem;font-weight:800;line-height:1.25;letter-spacing:-.01em}
+      .cmp-table thead th.cmp-store-head{background:var(--sc-bg,var(--surface-2));background:color-mix(in srgb,var(--sc,var(--line-strong)) 19%,var(--surface));color:var(--sc-ink,var(--ink))}
+      .cmp-table thead th.cmp-store-head .h-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--sc,transparent);margin-right:6px;vertical-align:0}
+      .cmp-table thead .cmp-prod{background:var(--surface-2);font-size:.78rem;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft)}
+      .cmp-table td.cmp-cell2{min-width:142px}
+      .cmp-table td.cmp-cell2 .c-price{font-family:"Archivo",sans-serif;font-weight:800;font-size:1.42rem;line-height:1.1;color:var(--amber-strong);letter-spacing:-.01em}
+      .cmp-table td.cmp-cell2 .c-price .disc{font-size:.95rem;color:var(--deal);margin-right:5px}
+      .cmp-table td.cmp-cell2 .c-name{font-size:.74rem;color:var(--ink-soft);line-height:1.4;margin-top:3px}
+      .cmp-table td.cmp-cell2 .c-reg{font-size:.74rem;color:var(--ink-faint);margin-top:2px}
+      .cmp-table td.cmp-cell2 .c-reg s{color:var(--ink-faint)}
+      .cmp-table td.cmp-cell2 .c-save{font-size:.76rem;font-weight:800;color:var(--deal);margin-top:4px}
+      .cmp-table td.cmp-cell2 .choice-badge{margin:6px 0 0;font-size:.7rem;padding:4px 9px}
+      .cmp-table td.cmp-cell2 .btn-add{min-height:38px;font-size:.8rem;padding:7px 11px;margin-top:8px;width:auto}
+      .cmp-table td.cmp-cell2.win{background:var(--amber-soft)}
+      .cmp-table td.cmp-miss{color:var(--ink-faint);background:var(--surface-2)}
+      .cmp-table td.cmp-miss .dash{font-family:"Archivo",sans-serif;font-weight:800;font-size:1.25rem;line-height:1.15;color:var(--ink-faint)}
+      .cmp-table td.cmp-miss .m-sub{font-size:.74rem;line-height:1.4;margin-top:2px}
+      .cmp-table tfoot td,.cmp-table tfoot th{border-bottom:none;border-top:2px solid var(--line-strong);background:var(--surface-2);vertical-align:top}
+      .cmp-table tfoot .cmp-prod{background:var(--surface-2)}
+      .cmp-table tfoot .t-lbl{font-weight:800;font-size:.86rem;line-height:1.3}
+      .cmp-table tfoot .t-sub{font-size:.73rem;color:var(--ink-soft);line-height:1.4;margin-top:2px}
+      .cmp-table tfoot .t-total{font-family:"Archivo",sans-serif;font-weight:800;font-size:1.42rem;line-height:1.1;color:var(--amber-strong)}
+      .cmp-table tfoot .t-cov{font-size:.74rem;color:var(--ink-soft);margin-top:3px;line-height:1.4}
+      .cmp-table tfoot .t-win{font-size:.74rem;font-weight:800;color:var(--amber-strong);margin-top:3px}
+      .cmp-empty{border:1px dashed var(--line-strong);border-radius:20px;padding:16px;background:var(--surface-2);font-size:.9rem;line-height:1.55;color:var(--ink-soft);margin-bottom:14px}
+      .cmp-empty strong{color:var(--ink)}
+
+      /* ===== Buscar por foto — miniatura en el chat y progreso del OCR ===== */
+      .photo-bubble{padding:10px}
+      .photo-thumb{display:block;max-width:230px;width:100%;height:auto;border-radius:14px}
+      .photo-cap{display:block;font-size:.78rem;font-weight:700;margin-top:7px;opacity:.85}
+      .photo-note{font-size:.83rem!important;color:var(--ink-soft);line-height:1.55}
+      .photo-prog{font-size:.86rem;font-weight:800;color:var(--amber-strong);min-height:1.25em;margin:0}
     </style>
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" /><link rel="apple-touch-icon" href="icon-512.png" /><meta property="og:type" content="website" /><meta property="og:title" content="Shopper.pr — Especiales de supermercados en Puerto Rico" /><meta property="og:description" content="Compara los especiales de la semana por pueblo: Econo, Plaza, SuperMax, Walgreens y más. Pregunta en el chat y ahorra." /><meta property="og:url" content="https://renito-san.github.io/Shopper.pr/" /><meta property="og:image" content="https://renito-san.github.io/Shopper.pr/icon-512.png" /><meta name="twitter:card" content="summary" /><meta name="description" content="Compara los especiales de la semana por pueblo: Econo, Plaza, SuperMax, Walgreens y más. Pregunta en el chat y ahorra." /></head>
   <body>
@@ -844,6 +916,7 @@
       <main class="chat" id="chat" aria-live="polite" aria-label="Conversación con el asistente"></main>
 
       <div class="composer-zone" id="composerZone">
+        <input id="photoInput" type="file" accept="image/*" capture="environment" hidden tabindex="-1" aria-hidden="true" />
         <button class="ask-pill" id="askPill" type="button" aria-label="Abrir la caja para preguntar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
           <span>Preguntar…</span>
@@ -858,6 +931,9 @@
           <label class="sr" for="q">Escribe tu pregunta</label>
           <div class="field">
             <input id="q" type="text" lang="es" spellcheck="true" autocomplete="off" placeholder="Pregunta en español: «¿hay café en especial?»" />
+            <button class="mic" id="camBtn" type="button" aria-label="Buscar por foto: tira una foto al empaque o a la etiqueta de precio">
+              <svg viewBox="0 0 24 24"><path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2s-1.43-3.2-3.2-3.2-3.2 1.43-3.2 3.2 1.43 3.2 3.2 3.2zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+            </button>
             <button class="mic" id="micBtn" type="button" hidden aria-label="Dictar tu pregunta por voz">
               <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
@@ -938,9 +1014,9 @@
       <div class="sheet">
         <button class="close" type="button" data-close="ovComparar" aria-label="Cerrar">✕</button>
         <h2 id="compararTitle">Comparar la compra de la semana</h2>
-        <p class="sub">Canasta común entre <strong>Econo, Selectos, SuperMax, Pueblo y Amigo</strong> — las cinco con shopper cargado de Shop.pr (Capa 1, verificado el 22-nov-2026; Pueblo y Amigo entraron completos con la cosecha ampliada). Solo entran productos <strong>comparables de verdad</strong>: misma presentación y misma unidad. Si una tienda no tiene un comparable, la celda dice «Sin comparable» y ese producto <strong>no se inventa ni se sustituye</strong>.</p>
+        <p class="sub">Escoge los productos con los botones y <strong>desliza la tabla pa'l lado</strong> para comparar precios por tienda. Misma presentación, sin sustitutos: si una tienda no tiene un comparable, su celda lleva <strong>—</strong>.</p>
         <div id="compararBody"></div>
-        <p class="fineprint">El total de la canasta suma <strong>solo las filas completas</strong> (el producto está en las tres tiendas con la misma presentación), usando el precio efectivo por unidad cuando la oferta es por paquete (ej. 2 × $1.00 = $0.50 c/u) y 1 libra en los precios por libra. Las filas parciales se muestran para que veas el precio, pero no entran al total — así ninguna tienda gana o pierde por un producto que otra no tiene. Walmart no entra a los totales de esta vista: su shopper es el de Thanksgiving con otra mezcla de productos, pero sí compara producto a producto en el chat, igual que Mr. Special, Mi Gente y las demás cadenas nuevas. Sam's Club, Costco y Union tampoco entran a la canasta: venden en presentaciones de club o mayoristas, que no son comparables con la compra regular.</p>
+        <p class="fineprint">La canasta compara entre <strong>Econo, Selectos, SuperMax, Pueblo y Amigo</strong> — las cinco con shopper cargado de Shop.pr (Capa 1, verificado el 22-nov-2026; Pueblo y Amigo entraron completos con la cosecha ampliada) — y solo con productos comparables de verdad: misma presentación y misma unidad. El total al pie de cada columna suma <strong>solo los productos escogidos donde esa tienda tiene comparable</strong>, usando el precio efectivo por unidad cuando la oferta es por paquete (ej. 2 × $1.00 = $0.50 c/u) y 1 libra en los precios por libra. Las celdas con <strong>—</strong> quedan fuera del total, y cada total dice en cuántos de los productos escogidos está contando — por eso un total con menos productos no se declara ganador contra uno completo. Walmart no entra a los totales de esta vista: su shopper es el de Thanksgiving con otra mezcla de productos, pero sí compara producto a producto en el chat, igual que Mr. Special, Mi Gente y las demás cadenas nuevas. Sam's Club, Costco y Union tampoco entran a la canasta: venden en presentaciones de club o mayoristas, que no son comparables con la compra regular.</p>
       </div>
     </div>
 
@@ -2331,6 +2407,10 @@ var HARVEST3 = [
         var o = OFFERS.filter(function (x) { return x.id === id; })[0];
         if (o) toast("Añadido: " + o.name + " (" + o.store + ")");
       }
+      // Productos escogidos para la tabla: null = todavía no se entra a
+      // Comparar; al entrar, la canasta comparable queda preseleccionada
+      // y René la ajusta con los botones. Vive solo en memoria (sesión).
+      var cmpSelected = null;
       function renderComparar() {
         var bk = buildBasket();
         var html = "";
@@ -2347,58 +2427,120 @@ var HARVEST3 = [
           return;
         }
         html += townNoteHtml(" Comparar usa solo las cadenas de su canasta presentes en tus pueblos: <strong>" + esc(bk.stores.join(", ")) + "</strong>.");
-        var verdict = "";
-        if (!bk.common.length) {
-          verdict = "Con las cadenas de tus pueblos (<strong>" + esc(bk.stores.join(", ")) + "</strong>) no hay productos que estén en <strong>todas</strong> con la misma presentación, así que no hay total de canasta que calcular — abajo ves las filas parciales, producto por producto.";
-          html += '<div class="cmp-verdict">' + verdict + "</div>";
-          document.getElementById("compararBody").innerHTML = html + cmpRowsHtml(bk);
+        // Productos comparables de verdad bajo el filtro actual: especial
+        // vigente en 2+ tiendas permitidas, misma presentación.
+        var available = bk.rows.filter(function (r) { return r.present.length >= 2; });
+        if (!available.length) {
+          html += '<div class="cmp-verdict">Con las cadenas de tus pueblos (<strong>' + esc(bk.stores.join(", ")) + '</strong>) ningún producto de la canasta está en <strong>2 o más tiendas</strong> con la misma presentación, así que no hay comparación honesta que mostrar — no invento precios ni sustituyo presentaciones.</div>';
+          document.getElementById("compararBody").innerHTML = html;
           return;
         }
-        if (bk.winStores.length === 1) {
-          var w = bk.winStores[0];
-          var others = bk.stores.filter(function (s) { return s !== w; }).map(function (s) { return "<strong>" + money(bk.totals[s] - bk.winTotal) + "</strong> menos que en " + esc(s); }).join(" y ");
-          verdict = "Con la canasta común de <strong>" + bk.common.length + " productos</strong> que están en las " + bk.stores.length + " tiendas comparadas con la misma presentación, la compra sale más barata en <strong>" + esc(w) + "</strong>: " + others + ".";
-        } else {
-          verdict = "Con la canasta común de <strong>" + bk.common.length + " productos</strong>, hay <strong>empate</strong> entre " + bk.winStores.map(esc).join(" y ") + " en " + money(bk.winTotal) + ".";
+        var availKeys = {};
+        available.forEach(function (r) { availKeys[r.item.key] = 1; });
+        // Preselección al entrar: toda la canasta comparable queda marcada.
+        if (cmpSelected === null) {
+          cmpSelected = {};
+          available.forEach(function (r) { cmpSelected[r.item.key] = 1; });
         }
-        html += '<div class="cmp-verdict">' + verdict + " El total suma <strong>solo las filas completas</strong> de abajo; las parciales no entran, para que ninguna tienda gane o pierda por un producto que otra no tiene.</div>";
-        html += '<div class="cmp-totals">' + bk.stores.map(function (s) {
-          var isWin = bk.winStores.indexOf(s) >= 0;
-          var diff = isWin
-            ? (bk.winStores.length === 1 ? '<div class="t-diff win">La más barata de la comparación</div>' : '<div class="t-diff win">Empate en el primer lugar</div>')
-            : '<div class="t-diff">+' + money(bk.totals[s] - bk.winTotal) + " vs. " + esc(bk.winStores[0]) + "</div>";
-          var partialCount = bk.rows.filter(function (r) { return !r.complete && r.cells[s]; }).length;
-          var partialTotal = bk.rows.filter(function (r) { return !r.complete; }).length;
-          return '<div class="cmp-total ' + storeClass(s) + '"><div class="t-store">' + esc(s) + '</div>' +
-            '<div class="t-price">' + money(bk.totals[s]) + "</div>" + diff +
-            '<div class="t-cov">Canasta común: ' + bk.common.length + " productos · En filas parciales tiene " + partialCount + " de " + partialTotal + "</div>" +
-            (isWin ? '<span class="choice-badge">★ <span>Canasta más <b>barata</b></span></span>' : "") + "</div>";
-        }).join("") + "</div>";
-        html += cmpRowsHtml(bk);
+        // Si un producto escogido perdió su comparable con el filtro de
+        // pueblos, sale de la tabla con aviso honesto — sin inventar nada.
+        var dropped = [];
+        Object.keys(cmpSelected).forEach(function (k) {
+          if (!availKeys[k]) {
+            var row = bk.rows.filter(function (r) { return r.item.key === k; })[0];
+            dropped.push(row ? row.item.label : k);
+            delete cmpSelected[k];
+          }
+        });
+        if (dropped.length) {
+          html += '<div class="cmp-dropped"><strong>Salió de la tabla:</strong> ' + dropped.map(esc).join(", ") +
+            " — con el filtro de pueblos actual ya no tiene comparable en 2 o más tiendas de la comparación, así que no lo muestro con precios inventados. Si marcas más pueblos, su botón vuelve a aparecer.</div>";
+        }
+        var selectedRows = available.filter(function (r) { return cmpSelected[r.item.key]; });
+        // ===== Botones para escoger los productos de la tabla =====
+        html += '<div class="cmp-picker"><h3>Escoge los productos</h3>' +
+          '<p class="cmp-picker-sub">La canasta básica viene marcada — toca un producto para añadirlo o quitarlo de la tabla. Solo salen los que tienen especial vigente en 2 o más tiendas de tus pueblos.</p>' +
+          '<div class="cmp-chips">' + available.map(function (r) {
+            var on = !!cmpSelected[r.item.key];
+            return '<button class="cmp-chip" type="button" data-cmp-key="' + esc(r.item.key) + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+              (on ? "✓ " : "") + esc(r.item.label) + " <small>en " + r.present.length + " tiendas</small></button>";
+          }).join("") + "</div>" +
+          '<div class="cmp-picker-actions"><button class="cmp-mini-btn" type="button" data-cmp-all="1">Marcar todos</button>' +
+          '<button class="cmp-mini-btn" type="button" data-cmp-none="1">Quitar todos</button></div></div>';
+        if (!selectedRows.length) {
+          html += '<div class="cmp-empty"><strong>No escogiste ningún producto.</strong> Marca al menos uno con los botones de arriba y la tabla aparece con sus precios lado a lado.</div>';
+          document.getElementById("compararBody").innerHTML = html;
+          return;
+        }
+        // ===== Totales por columna: suman SOLO las filas escogidas donde
+        // esa tienda tiene comparable; las celdas con — quedan fuera. =====
+        var footTotals = {}, footCounts = {};
+        bk.stores.forEach(function (s) {
+          footTotals[s] = 0; footCounts[s] = 0;
+          selectedRows.forEach(function (r) {
+            if (r.cells[s]) { footTotals[s] += r.cells[s].eff; footCounts[s]++; }
+          });
+        });
+        var fullStores = bk.stores.filter(function (s) { return footCounts[s] === selectedRows.length; });
+        var winStores = [];
+        if (fullStores.length >= 2) {
+          var best = Math.min.apply(null, fullStores.map(function (s) { return footTotals[s]; }));
+          winStores = fullStores.filter(function (s) { return Math.abs(footTotals[s] - best) < 0.005; });
+        }
+        var verdict = "";
+        if (winStores.length === 1) {
+          var w = winStores[0];
+          var others = fullStores.filter(function (s) { return s !== w; }).map(function (s) { return "<strong>" + money(footTotals[s] - footTotals[w]) + "</strong> menos que en " + esc(s); }).join(" y ");
+          verdict = "Con los <strong>" + selectedRows.length + " productos escogidos</strong> completos en todas, la compra sale más barata en <strong>" + esc(w) + "</strong>: " + others + ".";
+        } else if (winStores.length > 1) {
+          verdict = "Con los <strong>" + selectedRows.length + " productos escogidos</strong>, hay <strong>empate</strong> entre " + winStores.map(esc).join(" y ") + " en " + money(footTotals[winStores[0]]) + ".";
+        } else if (fullStores.length === 1) {
+          verdict = "Solo <strong>" + esc(fullStores[0]) + "</strong> tiene los <strong>" + selectedRows.length + " productos escogidos</strong>; las demás tiendas cubren una parte, así que sus totales al pie cuentan menos productos y no se declaran ganadoras.";
+        } else {
+          verdict = "Ninguna tienda tiene todos los <strong>" + selectedRows.length + " productos escogidos</strong>: cada total al pie suma solo los productos donde esa tienda tiene comparable — míralo junto al conteo de productos de cada columna.";
+        }
+        html += '<div class="cmp-verdict">' + verdict + " El total de cada columna suma <strong>solo las filas donde esa tienda tiene precio</strong>; las celdas con <strong>—</strong> quedan fuera del total.</div>";
+        html += cmpTableHtml(bk, selectedRows, footTotals, footCounts, winStores);
         html += '<div class="cmp-nocompare"><h3>En el shopper, pero sin comparación válida</h3>' +
           "<p><strong>Arroz:</strong> Econo lo trae en paquete de 17 lb, Selectos en 3 lb, Pueblo y Amigo en ofertas Goya/Rico por paquete y SuperMax en paquetes sin tamaño confirmado — no son la misma presentación en las cinco y no se suman.</p>" +
           "<p><strong>Papel higiénico Scott Comfort Plus:</strong> aparece en Econo, Selectos y SuperMax, pero en 6 rollos, 12 rollos y Mega Rolls — conteos distintos, fuera de la canasta.</p>" +
           "<p><strong>Pavo y pernil por libra:</strong> Econo, Selectos y SuperMax publican precio por libra; en Pueblo y Amigo la cosecha trae cenas completas y cortes sin unidad por libra confirmada en la lista en texto — no se mezclan, y esas filas quedan parciales.</p></div>";
         document.getElementById("compararBody").innerHTML = html;
+        bindCmpScroll();
       }
-      function cmpRowsHtml(bk) {
-        var html = "";
-        bk.rows.forEach(function (r) {
-          var layerTag = r.present.length ? " · " + esc(layerOf(r.cells[r.present[0]].offer).tag) : "";
-          html += '<div class="cmp-card"><h3>' + esc(r.item.label) + '</h3><div class="presenta">' + esc(r.item.presenta) + layerTag + "</div>" +
-            (r.complete ? "" : '<div class="partial-note">Fila parcial: no entra al total de la canasta.</div>') +
-            '<div class="cmp-cells">';
+      // Desvanecido de la derecha: indica que hay más columnas pa'l lado;
+      // se apaga cuando la tabla ya se deslizó hasta el final.
+      function bindCmpScroll() {
+        var wrap = document.querySelector("#compararBody .cmp-scroll-wrap");
+        if (!wrap) return;
+        var sc = wrap.querySelector(".cmp-scroll");
+        if (!sc) return;
+        function upd() { wrap.classList.toggle("at-end", sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 8); }
+        sc.addEventListener("scroll", upd, { passive: true });
+        upd();
+      }
+      function cmpTableHtml(bk, selectedRows, footTotals, footCounts, winStores) {
+        var html = '<div class="cmp-scroll-head"><span class="cmp-scroll-title">Tabla de comparables</span><span class="cmp-swipe-hint">Desliza pa\'l lado →</span></div>';
+        html += '<div class="cmp-scroll-wrap"><div class="cmp-scroll"><table class="cmp-table"><thead><tr>' +
+          '<th class="cmp-prod" scope="col">Producto</th>' +
+          bk.stores.map(function (s) {
+            return '<th class="cmp-store-head ' + storeClass(s) + '" scope="col"><span class="h-dot"></span>' + esc(s) + "</th>";
+          }).join("") + "</tr></thead><tbody>";
+        selectedRows.forEach(function (r) {
+          var layerTag = r.present.length ? " · " + esc(layerOf(r.cells[r.present[0]].offer).short) : "";
+          html += '<tr><th class="cmp-prod" scope="row"><div class="p-label">' + esc(r.item.label) + '</div>' +
+            '<div class="p-pres">' + esc(r.item.presenta) + layerTag + "</div>" +
+            '<div class="p-cov">En ' + r.present.length + " de " + bk.stores.length + " tiendas</div></th>";
           bk.stores.forEach(function (s) {
             var c = r.cells[s];
-            var sc = storeClass(s);
             if (!c) {
-              html += '<div class="cmp-cell missing ' + sc + '"><div class="c-store">' + esc(s) + '</div><div class="c-miss">Sin comparable</div><div class="c-miss-sub">Su shopper no trae esta presentación; no se sustituye por otra.</div></div>';
+              html += '<td class="cmp-miss ' + storeClass(s) + '"><div class="dash">—</div><div class="m-sub">Sin comparable: su shopper no trae esta presentación; no se sustituye por otra.</div></td>';
               return;
             }
             var o = c.offer;
             var isWin = r.winners.indexOf(s) >= 0 && r.present.length > 1;
             var pct = discountPct(o);
-            var priceShown = o.unit === "por libra" ? money(c.eff) + '<span style="font-size:.8rem;font-weight:600;color:var(--ink-soft)">/lb</span>' : money(c.eff);
+            var priceShown = o.unit === "por libra" ? money(c.eff) + '<span style="font-size:.78rem;font-weight:600;color:var(--ink-soft)">/lb</span>' : money(c.eff);
             var disc = pct ? '<span class="disc">-' + pct + "%</span>" : "";
             var save = "";
             if (isWin && r.winners.length === 1 && r.maxEff > r.minEff) {
@@ -2409,17 +2551,23 @@ var HARVEST3 = [
             var offerLine = o.priceLabel ? esc(o.priceLabel) + " en el shopper" : esc(o.unit);
             var sv2 = savingsOf(o);
             var ahorraPill = sv2 ? '<div class="c-save">AHORRAS ' + money(sv2.amount) + sv2.suffix + " vs. precio regular</div>" : "";
-            html += '<div class="cmp-cell ' + sc + (isWin ? " win" : "") + '"><div class="c-store">' + esc(s) + '</div>' +
-              '<div class="c-price">' + disc + priceShown + "</div>" +
+            html += '<td class="cmp-cell2 ' + storeClass(s) + (isWin ? " win" : "") + '"><div class="c-price">' + disc + priceShown + "</div>" +
               '<div class="c-name">' + esc(o.name) + " · " + offerLine + "</div>" +
               regLineHtml(o).replace("reg-line", "c-reg") + ahorraPill + save + badge +
-              '<button class="btn-add" type="button" data-add="' + o.id + '">+ Añadir a mi lista</button></div>';
+              '<button class="btn-add" type="button" data-add="' + o.id + '">+ Añadir a mi lista</button></td>';
           });
-          html += "</div></div>";
+          html += "</tr>";
         });
+        html += '</tbody><tfoot><tr><th class="cmp-prod" scope="row"><div class="t-lbl">Total de lo escogido</div>' +
+          '<div class="t-sub">Suma solo las filas con precio en esa tienda; las de — no cuentan.</div></th>' +
+          bk.stores.map(function (s) {
+            var isWin = winStores.indexOf(s) >= 0;
+            return '<td><div class="t-total">' + money(footTotals[s]) + '</div>' +
+              '<div class="t-cov">' + footCounts[s] + " de " + selectedRows.length + " productos escogidos</div>" +
+              (isWin ? '<div class="t-win">★ ' + (winStores.length > 1 ? "Empate en el primer lugar" : "La más barata de la comparación") + "</div>" : "") + "</td>";
+          }).join("") + "</tr></tfoot></table></div><div class=\"cmp-fade\"></div></div>";
         return html;
       }
-
       /* ===== Vista Ofertas — portada estilo feed, sin fotos =====
          La rejilla admite TODO especial vigente de las cadenas
          permitidas: primero los que tienen precio regular publicado
@@ -2622,8 +2770,8 @@ var HARVEST3 = [
             : bk.winStores.length === 1
             ? "Con la canasta común de <strong>" + bk.common.length + " productos</strong> comparables, la más barata es <strong>" + esc(bk.winStores[0]) + "</strong> con <strong>" + money(bk.winTotal) + "</strong>."
             : "Con la canasta común de <strong>" + bk.common.length + " productos</strong> hay empate en " + money(bk.winTotal) + " entre " + bk.winStores.map(esc).join(" y ") + ".";
-          botReply("<p>Te abrí <strong>Comparar</strong>: la canasta de la semana entre <strong>" + esc(bk.stores.join(", ")) + "</strong>, producto por producto, solo con presentaciones comparables de verdad. " + winTxt + "</p>" +
-            "<p>Si una tienda no tiene un producto comparable, su celda dice <strong>«Sin comparable»</strong> y esa fila no entra al total — no se sustituye por otra presentación. Desde cada celda puedes añadir el producto a tu lista.</p>");
+          botReply("<p>Te abrí <strong>Comparar</strong>: la canasta de la semana entre <strong>" + esc(bk.stores.join(", ")) + "</strong>, solo con presentaciones comparables de verdad, en una <strong>tabla que se desliza pa'l lado</strong> — la columna del producto queda fija y con los botones de arriba escoges qué productos entran. " + winTxt + "</p>" +
+            "<p>Si una tienda no tiene un producto comparable, su celda lleva <strong>—</strong> y queda fuera del total de esa tienda — no se sustituye por otra presentación. Desde cada celda puedes añadir el producto a tu lista.</p>");
           return;
         }
 
@@ -3180,6 +3328,24 @@ var HARVEST3 = [
         addToList(+b.getAttribute("data-add"), b);
       });
       document.getElementById("compararBody").addEventListener("click", function (e) {
+        var all = e.target.closest("[data-cmp-all]");
+        if (all) {
+          var bkAll = buildBasket();
+          cmpSelected = {};
+          bkAll.rows.forEach(function (r) { if (r.present.length >= 2) cmpSelected[r.item.key] = 1; });
+          renderComparar();
+          return;
+        }
+        var none = e.target.closest("[data-cmp-none]");
+        if (none) { cmpSelected = {}; renderComparar(); return; }
+        var chip = e.target.closest("[data-cmp-key]");
+        if (chip) {
+          var k = chip.getAttribute("data-cmp-key");
+          if (cmpSelected === null) cmpSelected = {};
+          if (cmpSelected[k]) delete cmpSelected[k]; else cmpSelected[k] = 1;
+          renderComparar();
+          return;
+        }
         var b = e.target.closest("[data-add]");
         if (!b) return;
         addToList(+b.getAttribute("data-add"), b);
@@ -3522,6 +3688,145 @@ var HARVEST3 = [
         });
       }
 
+      /* ===== Buscar por foto — OCR en el dispositivo (tesseract.js) =====
+         La cámara lee el TEXTO del empaque o de la etiqueta de precio y
+         ese texto busca en el catálogo con la maquinaria de siempre
+         (searchOffers + búsqueda difusa vía answer). NO reconoce el
+         producto por su forma o color: eso pediría un servicio de IA
+         con servidor, que esta app no tiene — y la interfaz lo dice.
+         La foto nunca sale del teléfono: el OCR corre local y la
+         miniatura es un object URL de la propia sesión. tesseract.js
+         se carga PEREZOSO desde el CDN fijado, solo al primer uso de
+         la cámara; si la carga falla, el mensaje lo dice honestamente. */
+      var TESS_URL = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+      var tessPromise = null;
+      function loadTesseract() {
+        if (window.Tesseract) return Promise.resolve(window.Tesseract);
+        if (tessPromise) return tessPromise;
+        tessPromise = new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = TESS_URL;
+          s.async = true;
+          s.onload = function () {
+            if (window.Tesseract) resolve(window.Tesseract);
+            else { tessPromise = null; reject(new Error("sin Tesseract")); }
+          };
+          s.onerror = function () { tessPromise = null; reject(new Error("carga")); };
+          document.head.appendChild(s);
+        });
+        return tessPromise;
+      }
+      // Candidatas de búsqueda desde el texto crudo del OCR: cada línea
+      // limpia y el conjunto de palabras útiles (sin signos, máx. 8).
+      function photoCandidates(rawText) {
+        var lines = String(rawText || "").split(/\r?\n/);
+        var cands = [], seen = {}, allWords = [];
+        lines.forEach(function (ln) {
+          var words = norm(ln).split(" ").filter(function (w) { return w.length >= 2 && /[a-z]/.test(w); });
+          words.forEach(function (w) { if (allWords.indexOf(w) < 0) allWords.push(w); });
+          var joined = words.join(" ").trim();
+          if (joined && words.some(function (w) { return w.length >= 3; }) && !seen[joined]) {
+            seen[joined] = 1; cands.push(joined);
+          }
+        });
+        var all = allWords.slice(0, 8).join(" ");
+        if (all && !seen[all]) cands.push(all);
+        return { candidates: cands, allWords: allWords, display: allWords.join(" ") };
+      }
+      // Escoge la candidata más IDENTIFICATIVA con resultados vigentes
+      // reales: cada palabra suma según su rareza en el catálogo (una
+      // línea genérica de tamaño —«molido 14 oz»— parearía con decenas
+      // de productos y no identifica ninguno; la marca rara manda).
+      // Si el pareo exacto no da nada, prueba la difusa igual que el chat.
+      var photoTokenFreq = null;
+      function catalogTokenFreq() {
+        if (photoTokenFreq) return photoTokenFreq;
+        var f = {};
+        OFFERS.forEach(function (o) {
+          var seen = {};
+          norm(o.name).split(" ").forEach(function (w) {
+            if (w.length >= 3 && !seen[w]) { seen[w] = 1; f[w] = (f[w] || 0) + 1; }
+          });
+        });
+        photoTokenFreq = { f: f, total: OFFERS.length };
+        return photoTokenFreq;
+      }
+      function pickPhotoQuery(pc) {
+        var cf = catalogTokenFreq();
+        var best = null, bestScore = -1;
+        pc.candidates.forEach(function (c) {
+          var live = searchOffers(c).live.length;
+          if (!live) return;
+          var score = Math.min(live, 10) * 0.05;
+          c.split(" ").forEach(function (w) {
+            if (w.length >= 3) score += Math.log(1 + cf.total / (1 + (cf.f[w] || 0)));
+          });
+          if (score > bestScore) { bestScore = score; best = c; }
+        });
+        if (best) return best;
+        for (var i = 0; i < pc.candidates.length; i++) {
+          var fz = fuzzySearchOffers(pc.candidates[i]);
+          if (fz && fz.res && fz.res.live.length) return pc.candidates[i];
+        }
+        return null;
+      }
+      function handlePhoto(file) {
+        if (typeof setMode === "function" && typeof appMode !== "undefined" && appMode !== "chat") setMode("chat");
+        var url = URL.createObjectURL(file);
+        var d = document.createElement("div");
+        d.className = "msg user";
+        d.innerHTML = '<div class="bubble photo-bubble"><img class="photo-thumb" src="' + url + '" alt="Foto que enviaste para buscar un producto" /><span class="photo-cap">Buscar por foto</span></div>';
+        chat.appendChild(d);
+        scrollDown();
+        var prog = addBot('<p><strong>Leyendo la foto…</strong></p>' +
+          '<p class="photo-note">Leo el texto del empaque o de la etiqueta aquí mismo, en tu teléfono: la foto nunca sale de él. Esto busca por el texto que se lee — no reconoce el producto por su forma o su color.</p>' +
+          '<p class="photo-prog" aria-live="polite"></p>');
+        var bubble = prog.querySelector(".bubble");
+        var progEl = prog.querySelector(".photo-prog");
+        function setProg(t) { if (progEl) progEl.textContent = t; }
+        loadTesseract().then(function (T) {
+          setProg("Preparando el lector de texto…");
+          return T.recognize(file, "spa+eng", {
+            logger: function (m) {
+              if (m && m.status === "recognizing text") setProg("Leyendo la foto… " + Math.round((m.progress || 0) * 100) + "%");
+            }
+          });
+        }).then(function (result) {
+          var text = (result && result.data && result.data.text) || "";
+          var pc = photoCandidates(text);
+          if (!pc.allWords.length) {
+            bubble.innerHTML = "<p>No leí texto útil en esa foto: salió borrosa, muy oscura o sin letras legibles en el empaque o la etiqueta. Acércala a las letras grandes del producto y trata otra vez — o escríbeme o díctame el nombre y lo busco igual.</p>";
+            scrollDown();
+            return;
+          }
+          var pick = pickPhotoQuery(pc);
+          if (!pick) {
+            var shown = pc.display.length > 140 ? pc.display.slice(0, 140) + "…" : pc.display;
+            bubble.innerHTML = "<p>Leí esto en la foto: <strong>«" + esc(shown) + "»</strong>, pero no pareó con ningún producto del catálogo vigente — puede que ese artículo no esté en los shoppers de esta semana o que el texto saliera distinto. Escríbeme o díctame el nombre tal cual y lo busco de nuevo.</p>" +
+              '<p class="photo-note">La foto se leyó en tu teléfono y no salió de él.</p>';
+            scrollDown();
+            return;
+          }
+          bubble.innerHTML = "<p>Busqué por foto: <strong>«" + esc(pick) + "»</strong></p>" +
+            '<p class="photo-note">Texto leído del empaque o la etiqueta, aquí en tu teléfono — la foto no salió de él.</p>';
+          scrollDown();
+          answer(pick);
+        }).catch(function () {
+          bubble.innerHTML = "<p>No pude leer la foto: el lector de texto no cargó (¿sin conexión en este momento?) o falló al procesarla. Tu foto no salió del teléfono. Escríbeme o díctame el nombre del producto y lo busco igual.</p>";
+          scrollDown();
+        });
+      }
+      var camBtn = document.getElementById("camBtn");
+      var photoInput = document.getElementById("photoInput");
+      if (camBtn && photoInput) {
+        camBtn.addEventListener("click", function () { photoInput.click(); });
+        photoInput.addEventListener("change", function () {
+          var f = photoInput.files && photoInput.files[0];
+          photoInput.value = "";
+          if (f) handlePhoto(f);
+        });
+      }
+
       function renderVigentes() {
         document.getElementById("vigList").innerHTML = STORES.map(function (s) {
           var sc = storeClass(s.name);
@@ -3736,7 +4041,8 @@ var HARVEST3 = [
         if (btn) btn.addEventListener("click", function () {
           if (deferred) {
             var d = deferred; deferred = null;
-            try { d.prompt(); } catch (e) {}
+            var showInstallPrompt = d.prompt;
+            try { showInstallPrompt.call(d); } catch (e) {}
             if (d.userChoice && d.userChoice.then) d.userChoice.then(function () { hide(); });
             else hide();
           } else if (how) {
