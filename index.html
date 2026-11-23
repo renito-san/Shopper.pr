@@ -442,6 +442,17 @@
       .install-btn svg{width:17px;height:17px;fill:currentColor;flex:0 0 17px}
       .install-btn:active{transform:scale(.98)}
       .install-x{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:transparent;color:inherit;display:grid;place-items:center;font-size:1rem}
+      /* ===== Barra de corrección propia — sobre el composer, mismo patrón
+         que la barra de instalación: fina, descartable, solo aparece
+         mientras se escribe y hay una palabra con corrección clara. ===== */
+      .correct-bar{display:flex;align-items:center;flex-wrap:wrap;gap:7px 8px;padding:8px 8px 8px 16px;background:var(--amber-soft);border-top:1px solid var(--line);color:var(--ink)}
+      .correct-bar[hidden]{display:none}
+      .correct-bar .cb-lbl{font-size:.82rem;font-weight:800;color:var(--amber-ink);white-space:nowrap}
+      .correct-bar .cb-chips{display:flex;flex-wrap:wrap;gap:7px;flex:1 1 auto;min-width:0}
+      .correct-chip{min-height:40px;padding:7px 13px;border-radius:999px;border:1.5px solid var(--amber-bright);background:var(--surface);color:var(--ink);font-size:.88rem;font-weight:700;box-shadow:var(--shadow-sm)}
+      .correct-chip b{color:var(--amber-strong);font-weight:800}
+      .correct-chip:active{transform:scale(.98);background:var(--amber-soft)}
+      .correct-x{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--amber-ink);display:grid;place-items:center;font-size:1rem}
       /* ===== Mi lista: ahorro acumulado y botón WhatsApp ===== */
       .list-save{margin-top:12px;background:var(--surface-2);border:1px solid var(--line);border-left:5px solid #12805c;border-radius:12px;padding:11px 13px;font-size:.92rem;line-height:1.5}
       .list-save strong{color:#12805c}
@@ -685,10 +696,15 @@
           <span>Preguntar…</span>
           <svg class="pill-mic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
         </button>
+        <div class="correct-bar" id="correctBar" hidden role="region" aria-label="Sugerencias de corrección">
+          <span class="cb-lbl">¿Quisiste decir?</span>
+          <div class="cb-chips" id="correctChips"></div>
+          <button class="correct-x" id="correctDismiss" type="button" aria-label="Descartar las sugerencias de corrección">✕</button>
+        </div>
         <form class="composer" id="composer" hidden>
           <label class="sr" for="q">Escribe tu pregunta</label>
           <div class="field">
-            <input id="q" type="text" autocomplete="off" placeholder="Pregunta en español: «¿hay café en especial?»" />
+            <input id="q" type="text" lang="es" spellcheck="true" autocomplete="off" placeholder="Pregunta en español: «¿hay café en especial?»" />
             <button class="mic" id="micBtn" type="button" hidden aria-label="Dictar tu pregunta por voz">
               <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
@@ -2638,6 +2654,7 @@ var HARVEST3 = [
         if (!v && appMode !== "compras") return;
         if (v) addUser(v);
         input.value = "";
+        if (typeof correctBar !== "undefined" && correctBar) correctBar.hidden = true;
         if (appMode === "recetas") { setMode("chat"); answerRecipe(v); }
         else if (appMode === "compras") { refreshComprasPanel(); botReply(optimizerSummaryHtml()); }
         else answer(v);
@@ -2653,10 +2670,12 @@ var HARVEST3 = [
         composerForm.hidden = false;
         askPill.hidden = true;
         if (withFocus) input.focus();
+        if (typeof updateCorrectionBar === "function") updateCorrectionBar();
       }
       function collapseComposer() {
         composerForm.hidden = true;
         askPill.hidden = false;
+        if (typeof correctBar !== "undefined" && correctBar) correctBar.hidden = true;
       }
       askPill.addEventListener("click", function () { expandComposer(true); });
       document.getElementById("collapseBtn").addEventListener("click", function () { collapseComposer(); input.blur(); });
@@ -2668,6 +2687,191 @@ var HARVEST3 = [
       input.addEventListener("keydown", function (e) {
         if (e.key === "Escape") { collapseComposer(); input.blur(); }
       });
+
+      /* ===== Corrector propio de la caja del chat =====
+         El teclado del teléfono puede estar en inglés: su corrector
+         sugiere basura («Bebolla» → «Bebop») y al mantener presionada la
+         palabra solo salen Cortar/Copiar/Pegar. Esta barra es el
+         corrector DENTRO de la app: mientras el usuario escribe (o al
+         llegar el resultado final del dictado por voz), tokeniza el
+         texto y marca las palabras NO reconocidas contra el vocabulario
+         de la app — nombres de producto del catálogo, recetas, tiendas
+         y la lista blanca de palabras funcionales del español y del
+         dominio. Por cada palabra sospechosa con UN ganador difuso
+         claro muestra un chip tocable «mal → bien»; tocarlo reemplaza
+         SOLO esa ocurrencia en la caja, mantiene el foco y deja el
+         cursor tras la palabra corregida. Sin toque no se corrige
+         NADA automáticamente. Sin palabra sospechosa, la barra no
+         aparece. No se marcan: palabras de menos de 3 letras, números
+         ni cantidades («2», «x2», «2x»), palabras reconocidas, ni las
+         palabras que forman una frase/receta conocida («arroz con
+         gandules», «leche de coco»…). La capa difusa es la misma de la
+         búsqueda (pliegue fonético + distancia de edición + bigramas,
+         con fuzzyClearWinner: entre dos productos parecidos no se
+         adivina), con UNA relajación: el ganador puede diferir en la
+         primera letra si el resto calza casi exacto (distancia ≤1,
+         bigramas ≥0.6) y la palabra manda en el catálogo (4+ ofertas)
+         — sin eso, «Bebolla» nunca llegaría a «cebolla» porque la capa
+         original exige la misma letra inicial, y sin el peso de
+         catálogo «aris» se iría a «irish» en vez de a «arroz». */
+      var correctBar = document.getElementById("correctBar");
+      var correctChips = document.getElementById("correctChips");
+      var correctDismissedText = null;
+      var CORRECT_KNOWN = null, CORRECT_VOCAB = null, CORRECT_WORDS = null;
+      var CORRECT_DOMAIN = ["quiero", "necesito", "hay", "especial", "especiales", "precio", "precios", "cuanto", "cuanta", "cuantos", "cuantas", "cuesta", "cuestan", "donde", "cuando", "lista", "listas", "compara", "comparar", "compra", "compras", "comprar", "tienda", "tiendas", "supermercado", "supermercados", "oferta", "ofertas", "barato", "barata", "baratos", "baratas", "caro", "cara", "mejor", "mejores", "conviene", "vale", "valen", "vende", "venden", "queda", "quedan", "vigente", "vigentes", "vence", "vencen", "pueblo", "pueblos", "producto", "productos", "semana", "favor", "gracias", "hola"];
+      var CORRECT_KNOWN_ONLY = "el la los las un una unos unas de del al a en con sin por para que y o u e ni pero mas menos muy mucho mucha muchos muchas poco poca este esta estos estas ese esa esos esas eso esto aquel aquella mi mis tu tus su sus nuestro nuestra yo ella nosotros ustedes ellos ellas me te se nos lo le les como quien quienes cual cuales porque tambien tampoco algo nada todo toda todos todas hay habia ser es son esta estan estaba estoy estas estamos era eran fui fue tengo tiene tienen busca buscar buscame dame ponme agrega agregame anade anademe hazme trae traeme llevo llevar voy vas va vamos ir buenas buenos dias tardes noches saludos familia casa cena hacer hecho grande grandes nuevo nueva nuevos nuevas hoy ayer manana tarde noche dia mes ano".split(" ");
+      function buildCorrectionData() {
+        if (CORRECT_KNOWN) return;
+        var known = {}, vocab = [], seenV = {};
+        function addKnown(w) { if (w && w.length >= 2) known[w] = 1; }
+        function addCand(w, n) {
+          var nw = norm(String(w || ""));
+          if (!nw || nw.length < 3 || seenV[nw] || /^\d/.test(nw)) return;
+          seenV[nw] = 1;
+          vocab.push({ w: nw, f: foldEs(nw), n: n || 1 });
+          known[nw] = 1;
+        }
+        fuzzVocab().forEach(function (v) { addCand(v.w, v.n); });
+        STORES.forEach(function (s) {
+          norm(s.name).split(" ").forEach(function (w) { if (w.length >= 3) addCand(w, 2); else addKnown(w); });
+        });
+        RECIPES.forEach(function (r) {
+          norm(r.name).split(" ").forEach(function (w) { if (w.length >= 3) addCand(w, 2); else addKnown(w); });
+          (r.alias || []).forEach(function (a) {
+            norm(a).split(" ").forEach(function (w) { if (w.length >= 3) addCand(w, 2); else addKnown(w); });
+          });
+        });
+        CORRECT_DOMAIN.forEach(function (w) { addCand(w, 1); });
+        Object.keys(STOPQ).forEach(addKnown);
+        if (typeof LIST_FILLER !== "undefined") Object.keys(LIST_FILLER).forEach(addKnown);
+        if (typeof LIST_QGUARD !== "undefined") Object.keys(LIST_QGUARD).forEach(addKnown);
+        CORRECT_KNOWN_ONLY.forEach(addKnown);
+        CORRECT_KNOWN = known;
+        CORRECT_VOCAB = vocab;
+        CORRECT_WORDS = Object.keys(known);
+      }
+      function correctionIsKnown(tk) {
+        if (CORRECT_KNOWN[tk]) return true;
+        return tokenHit(tk, CORRECT_WORDS);
+      }
+      function correctionCandidates(tok, vocab) {
+        var f = foldEs(tok), out = [];
+        for (var i = 0; i < vocab.length; i++) {
+          var v = vocab[i];
+          if (Math.abs(v.f.length - f.length) > 2) continue;
+          var maxLen = Math.max(f.length, v.f.length);
+          var cap = maxLen >= 5 ? 2 : 1;
+          var d = editDist(f, v.f, cap + 1);
+          var dice = bigramDice(f, v.f);
+          var sameFirst = v.f.charAt(0) === f.charAt(0);
+          // Primera letra distinta: solo si el resto calza casi exacto
+          // (distancia ≤1, bigramas ≥0.6) Y la palabra manda en el
+          // catálogo (aparece en 4+ ofertas). Sin el peso de catálogo,
+          // «aris» se iría a «irish» (Irish Spring, 2 ofertas) en vez de
+          // a «arroz»; con él, «Bebolla» sí llega a «cebolla».
+          var ok = sameFirst ? (d <= cap || dice >= (maxLen >= 5 ? 0.6 : 0.7)) : (d <= 1 && dice >= 0.6 && (v.n || 1) >= 4);
+          if (ok) out.push({ w: v.w, d: d, dice: dice, n: v.n || 1 });
+        }
+        // Orden de desempate PROPIO del corrector (distinto del de la
+        // búsqueda difusa): distancia, luego PESO DE CATÁLOGO, luego
+        // bigramas. Con bigramas primero, «aris» se iba a «irish»
+        // (iris: dice 0.67) aunque «arroz» (aros: dice 0.33) está a la
+        // misma distancia 1 y aparece en muchísimas más ofertas; con el
+        // peso de catálogo mandando, la regla de dominancia de
+        // fuzzyClearWinner (ganador en 8+ ofertas y 4× el segundo)
+        // corona a «arroz». «Bebolla» no se afecta: «cebolla» es la
+        // única candidata a distancia 1.
+        out.sort(function (a, b) {
+          if (a.d !== b.d) return a.d - b.d;
+          if ((b.n || 1) !== (a.n || 1)) return (b.n || 1) - (a.n || 1);
+          return b.dice - a.dice;
+        });
+        return out;
+      }
+      function correctionProtectedFlags(normToks) {
+        var flags = normToks.map(function () { return false; });
+        var seqs = [];
+        RECIPES.forEach(function (r) {
+          seqs.push(norm(r.name).split(" "));
+          (r.alias || []).forEach(function (a) { seqs.push(norm(a).split(" ")); });
+        });
+        ["leche de coco", "crema de coco", "leche condensada", "leche evaporada", "papel higienico", "papel toalla", "aceite de oliva", "aceite de maiz", "salsa de tomate", "cena de pernil", "cena de pavo"].forEach(function (p) { seqs.push(p.split(" ")); });
+        seqs.forEach(function (seq) {
+          if (seq.length < 2) return;
+          for (var i = 0; i + seq.length <= normToks.length; i++) {
+            var ok = true;
+            for (var j = 0; j < seq.length; j++) { if (normToks[i + j] !== seq[j]) { ok = false; break; } }
+            if (ok) for (var k = 0; k < seq.length; k++) flags[i + k] = true;
+          }
+        });
+        return flags;
+      }
+      function findCorrections(text) {
+        buildCorrectionData();
+        var tokens = [], re = /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]+/g, m;
+        while ((m = re.exec(String(text || ""))) !== null) {
+          tokens.push({ raw: m[0], start: m.index, end: m.index + m[0].length, norm: norm(m[0]) });
+        }
+        var prot = correctionProtectedFlags(tokens.map(function (t) { return t.norm; }));
+        var out = [];
+        tokens.forEach(function (t, idx) {
+          if (prot[idx]) return;
+          if (t.raw.length < 3 || /\d/.test(t.raw)) return;
+          var tk = t.norm;
+          if (!tk || tk.length < 3) return;
+          if (correctionIsKnown(tk)) return;
+          var win = fuzzyClearWinner(correctionCandidates(tk, CORRECT_VOCAB));
+          if (!win || win.w === tk) return;
+          out.push({ from: t.raw, to: win.w, start: t.start, end: t.end });
+        });
+        return out;
+      }
+      function applyCorrection(fx) {
+        var cur = input.value;
+        var start = fx.start, end = fx.end;
+        if (cur.slice(start, end) !== fx.from) {
+          var ix = cur.indexOf(fx.from);
+          if (ix < 0) { updateCorrectionBar(); return; }
+          start = ix; end = ix + fx.from.length;
+        }
+        input.value = cur.slice(0, start) + fx.to + cur.slice(end);
+        correctDismissedText = null;
+        input.focus();
+        var pos = start + fx.to.length;
+        try { input.setSelectionRange(pos, pos); } catch (err) {}
+        updateCorrectionBar();
+      }
+      function updateCorrectionBar() {
+        if (!correctBar) return [];
+        var text = input.value;
+        if (!text || !text.trim() || composerForm.hidden) { correctBar.hidden = true; correctChips.innerHTML = ""; return []; }
+        if (correctDismissedText !== null && correctDismissedText === text) { correctBar.hidden = true; return []; }
+        if (correctDismissedText !== null) correctDismissedText = null;
+        var fixes = [];
+        try { fixes = findCorrections(text); } catch (err) { fixes = []; }
+        if (!fixes.length) { correctBar.hidden = true; correctChips.innerHTML = ""; return fixes; }
+        correctChips.innerHTML = "";
+        fixes.forEach(function (fx) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "correct-chip";
+          b.innerHTML = esc(fx.from) + " &rarr; <b>" + esc(fx.to) + "</b>";
+          b.setAttribute("aria-label", "Corregir " + fx.from + " por " + fx.to);
+          b.addEventListener("click", function () { applyCorrection(fx); });
+          correctChips.appendChild(b);
+        });
+        correctBar.hidden = false;
+        return fixes;
+      }
+      window.ShopperCorrect = { findCorrections: findCorrections, updateBar: updateCorrectionBar };
+      if (correctBar) {
+        document.getElementById("correctDismiss").addEventListener("click", function () {
+          correctDismissedText = input.value;
+          correctBar.hidden = true;
+          input.focus();
+        });
+      }
+      input.addEventListener("input", function () { updateCorrectionBar(); });
       document.querySelectorAll(".chip").forEach(function (chip) {
         chip.addEventListener("click", function () {
           var name = chip.getAttribute("data-store");
@@ -3100,6 +3304,14 @@ var HARVEST3 = [
               try { recog.stop(); } catch (err) {}
               if (!said) return;
               input.value = said;
+              // Corrector sobre el dictado: el chequeo corre también al
+              // llegar el resultado final de la voz. Si hay una corrección
+              // clara sugerida, el texto se queda en la caja con la barra
+              // visible para que el usuario la toque — no se envía solo
+              // con la palabra mal transcrita. Sin sugerencias, el
+              // dictado se envía solo, como siempre.
+              var dictFixes = (typeof updateCorrectionBar === "function") ? updateCorrectionBar() : [];
+              if (dictFixes && dictFixes.length) { input.focus(); toast("Revisa la corrección sugerida sobre la caja"); return; }
               var form = document.getElementById("composer");
               if (form.requestSubmit) form.requestSubmit();
               else document.getElementById("sendBtn").click();
