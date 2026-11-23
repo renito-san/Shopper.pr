@@ -173,38 +173,71 @@
       .chip{flex:0 0 auto;min-height:40px;padding:8px 15px;border-radius:999px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:.89rem;font-weight:600;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;display:inline-flex;align-items:center;gap:7px}
       .chip::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--sc,var(--line-strong));flex:0 0 9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
       .chip[data-store="todas"]::before{display:none}
-      .chip[data-store="Econo"]{--sc:#1a7f37;--sc-bg:#e6f4ea}
-      .chip[data-store="SuperMax"]{--sc:#c1272d;--sc-bg:#fdecea}
-      .chip[data-store="Walmart"]{--sc:#0071ce;--sc-bg:#e0eefb}
-      .chip[data-store="Pueblo"]{--sc:#dd6b00;--sc-bg:#fff0db}
-      .chip[data-store="Selectos"]{--sc:#7c3aed;--sc-bg:#efe9fd}
-      .chip[data-store="Amigo"]{--sc:#0f766e;--sc-bg:#d9f2ee}
-      .chip[data-store="Walgreens"]{--sc:#c2187a;--sc-bg:#fce4f1}
-      .chip[data-store="Plaza Tu Supermercado"]{--sc:#0284c7;--sc-bg:#e0f2fe}
-      .chip[data-store="Mr. Special"]{--sc:#0e7490;--sc-bg:#e0f5fa}
-      .chip[data-store="Mi Gente"]{--sc:#4d7c0f;--sc-bg:#ecfccb}
-      .chip[data-store="Farmacias Plaza"]{--sc:#be123c;--sc-bg:#ffe4e6}
-      .chip[data-store="Max's"]{--sc:#4f46e5;--sc-bg:#e0e7ff}
-      .chip[data-store="Hatillo Kash N' Karry"]{--sc:#059669;--sc-bg:#d1fae5}
-      .chip[data-store="Plaza Loiza"]{--sc:#f59e0b;--sc-bg:#fef3c7}
-      .chip[data-store="FreshMart"]{--sc:#65a30d;--sc-bg:#ecfccb}
-      .chip[data-store="Famcoop"]{--sc:#a16207;--sc-bg:#fef9c3}
-      .chip[data-store="Agranel"]{--sc:#1d4ed8;--sc-bg:#dbeafe}
-      .chip[data-store="Napo Vélez"]{--sc:#581c87;--sc-bg:#f3e8ff}
-      .chip[data-store="Costco"]{--sc:#9d0208;--sc-bg:#fee2e2}
-      .chip[data-store="Sam's Club"]{--sc:#334155;--sc-bg:#e2e8f0}
-      .chip[data-store="Union Cash & Carry"]{--sc:#854d0e;--sc-bg:#fef3c7}
-      .chip[data-store="Comercio Cash & Carry"]{--sc:#b87333;--sc-bg:#f7ead9}
-      .chip[data-store="Somos Tu Cash & Carry"]{--sc:#00695c;--sc-bg:#d9f0e9}
-      .chip[data-store="Farmacias Aliadas"]{--sc:#a21caf;--sc-bg:#fae8ff}
-      .chip[data-store="Farmacias Caridad"]{--sc:#0891b2;--sc-bg:#cffafe}
-      .chip[data-store="Farmacias Savia"]{--sc:#e11d48;--sc-bg:#ffe4e6}
-      .chip:not([data-store="todas"]){border-color:var(--sc)}
+      .chip[data-store="Econo"]{--sc:#1a7f37;--sc-bg:#e6f4ea;--sc-ink:#14532d}
+      .chip[data-store="SuperMax"]{--sc:#c1272d;--sc-bg:#fdecea;--sc-ink:#7f1d1d}
+      .chip[data-store="Walmart"]{--sc:#0071ce;--sc-bg:#e0eefb;--sc-ink:#0b3d66}
+      .chip[data-store="Pueblo"]{--sc:#dd6b00;--sc-bg:#fff0db;--sc-ink:#7a3a00}
+      .chip[data-store="Selectos"]{--sc:#7c3aed;--sc-bg:#efe9fd;--sc-ink:#4c1d95}
+      .chip[data-store="Amigo"]{--sc:#0f766e;--sc-bg:#d9f2ee;--sc-ink:#134e4a}
+      .chip[data-store="Walgreens"]{--sc:#c2187a;--sc-bg:#fce4f1;--sc-ink:#831843}
+      .chip[data-store="Plaza Tu Supermercado"]{--sc:#0284c7;--sc-bg:#e0f2fe;--sc-ink:#075985}
+      .chip[data-store="Mr. Special"]{--sc:#0e7490;--sc-bg:#e0f5fa;--sc-ink:#164e63}
+      .chip[data-store="Mi Gente"]{--sc:#4d7c0f;--sc-bg:#ecfccb;--sc-ink:#365314}
+      .chip[data-store="Farmacias Plaza"]{--sc:#be123c;--sc-bg:#ffe4e6;--sc-ink:#881337}
+      .chip[data-store="Max's"]{--sc:#4f46e5;--sc-bg:#e0e7ff;--sc-ink:#312e81}
+      .chip[data-store="Hatillo Kash N' Karry"]{--sc:#059669;--sc-bg:#d1fae5;--sc-ink:#064e3b}
+      .chip[data-store="Plaza Loiza"]{--sc:#f59e0b;--sc-bg:#fef3c7;--sc-ink:#92400e}
+      .chip[data-store="FreshMart"]{--sc:#65a30d;--sc-bg:#ecfccb;--sc-ink:#3f6212}
+      .chip[data-store="Famcoop"]{--sc:#a16207;--sc-bg:#fef9c3;--sc-ink:#713f12}
+      .chip[data-store="Agranel"]{--sc:#1d4ed8;--sc-bg:#dbeafe;--sc-ink:#1e3a8a}
+      .chip[data-store="Napo Vélez"]{--sc:#581c87;--sc-bg:#f3e8ff;--sc-ink:#3b0764}
+      .chip[data-store="Costco"]{--sc:#9d0208;--sc-bg:#fee2e2;--sc-ink:#7f1d1d}
+      .chip[data-store="Sam's Club"]{--sc:#334155;--sc-bg:#e2e8f0;--sc-ink:#1e293b}
+      .chip[data-store="Union Cash & Carry"]{--sc:#854d0e;--sc-bg:#fef3c7;--sc-ink:#713f12}
+      .chip[data-store="Comercio Cash & Carry"]{--sc:#b87333;--sc-bg:#f7ead9;--sc-ink:#6e4416}
+      .chip[data-store="Somos Tu Cash & Carry"]{--sc:#00695c;--sc-bg:#d9f0e9;--sc-ink:#00473e}
+      .chip[data-store="Farmacias Aliadas"]{--sc:#a21caf;--sc-bg:#fae8ff;--sc-ink:#701a75}
+      .chip[data-store="Farmacias Caridad"]{--sc:#0891b2;--sc-bg:#cffafe;--sc-ink:#164e63}
+      .chip[data-store="Farmacias Savia"]{--sc:#e11d48;--sc-bg:#ffe4e6;--sc-ink:#881337}
+      .chip:not([data-store="todas"]){background:var(--sc-bg);background:color-mix(in srgb,var(--sc) 19%,transparent);border-color:color-mix(in srgb,var(--sc) 38%,transparent);color:var(--sc-ink,var(--ink));font-weight:700}
       .chip:active{transform:scale(.98)}
       .chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
       .chip:not([data-store="todas"])[aria-pressed="true"]{background:var(--sc);border-color:var(--sc);color:#fff}
       .chip:not([data-store="todas"])[aria-pressed="true"]::before{background:#fff}
-      @media(prefers-color-scheme:dark){.chip[aria-pressed="true"]{background:#E7F2EA;border-color:#E7F2EA;color:#14231A}.chip:not([data-store="todas"])[aria-pressed="true"]{background:var(--sc);border-color:var(--sc);color:#0F1512}.chip:not([data-store="todas"])[aria-pressed="true"]::before{background:#0F1512}}
+      .chip[data-store="Plaza Loiza"][aria-pressed="true"],.chip[data-store="Famcoop"][aria-pressed="true"]{color:#422006}
+      .chip[data-store="Plaza Loiza"][aria-pressed="true"]::before,.chip[data-store="Famcoop"][aria-pressed="true"]::before{background:#422006}
+      @media(prefers-color-scheme:dark){
+        .chip[data-store="Econo"]{--sc:#4ade80;--sc-ink:#bbf7d0}
+        .chip[data-store="SuperMax"]{--sc:#f87171;--sc-ink:#fecaca}
+        .chip[data-store="Walmart"]{--sc:#60a5fa;--sc-ink:#bfdbfe}
+        .chip[data-store="Pueblo"]{--sc:#fb923c;--sc-ink:#fed7aa}
+        .chip[data-store="Selectos"]{--sc:#a78bfa;--sc-ink:#ddd6fe}
+        .chip[data-store="Amigo"]{--sc:#2dd4bf;--sc-ink:#99f6e4}
+        .chip[data-store="Walgreens"]{--sc:#f472b6;--sc-ink:#fbcfe8}
+        .chip[data-store="Plaza Tu Supermercado"]{--sc:#38bdf8;--sc-ink:#bae6fd}
+        .chip[data-store="Mr. Special"]{--sc:#22d3ee;--sc-ink:#a5f3fc}
+        .chip[data-store="Mi Gente"]{--sc:#a3e635;--sc-ink:#d9f99d}
+        .chip[data-store="Farmacias Plaza"]{--sc:#fb7185;--sc-ink:#fecdd3}
+        .chip[data-store="Max's"]{--sc:#818cf8;--sc-ink:#c7d2fe}
+        .chip[data-store="Hatillo Kash N' Karry"]{--sc:#34d399;--sc-ink:#a7f3d0}
+        .chip[data-store="Plaza Loiza"]{--sc:#fbbf24;--sc-ink:#fde68a}
+        .chip[data-store="FreshMart"]{--sc:#bef264;--sc-ink:#ecfccb}
+        .chip[data-store="Famcoop"]{--sc:#facc15;--sc-ink:#fef08a}
+        .chip[data-store="Agranel"]{--sc:#93c5fd;--sc-ink:#dbeafe}
+        .chip[data-store="Napo Vélez"]{--sc:#c084fc;--sc-ink:#f3e8ff}
+        .chip[data-store="Costco"]{--sc:#fca5a5;--sc-ink:#fee2e2}
+        .chip[data-store="Sam's Club"]{--sc:#94a3b8;--sc-ink:#e2e8f0}
+        .chip[data-store="Union Cash & Carry"]{--sc:#f59e0b;--sc-ink:#fde68a}
+        .chip[data-store="Comercio Cash & Carry"]{--sc:#d99a5b;--sc-ink:#f3d9b8}
+        .chip[data-store="Somos Tu Cash & Carry"]{--sc:#4db6a4;--sc-ink:#b2dfdb}
+        .chip[data-store="Farmacias Aliadas"]{--sc:#e879f9;--sc-ink:#fae8ff}
+        .chip[data-store="Farmacias Caridad"]{--sc:#67e8f9;--sc-ink:#cffafe}
+        .chip[data-store="Farmacias Savia"]{--sc:#fda4af;--sc-ink:#ffe4e6}
+        .chip:not([data-store="todas"]){background:color-mix(in srgb,var(--sc) 27%,transparent);border-color:color-mix(in srgb,var(--sc) 45%,transparent)}
+        .chip[aria-pressed="true"]{background:#E7F2EA;border-color:#E7F2EA;color:#14231A}
+        .chip:not([data-store="todas"])[aria-pressed="true"]{background:var(--sc);border-color:var(--sc);color:#0F1512}
+        .chip:not([data-store="todas"])[aria-pressed="true"]::before{background:#0F1512}
+      }
       .chip .out{font-weight:500;font-size:.76rem;opacity:.7}
       .chip[hidden]{display:none}
       /* Filtro duro de pueblos: cadenas fuera de los pueblos marcados */
@@ -630,14 +663,23 @@
       .loc-btn{border:1px solid transparent;background:var(--surface-2)}
       .loc-panel{border:1px solid var(--line);border-radius:20px}
       .loc-done{background:var(--amber-bright);color:#fff}
-      /* — Chips: gris suave; la activa, verde sólido — */
+      /* — Pastillas de tienda: TODA la pastilla en pastel translúcido
+         de su tienda (color al ~19% sobre el fondo, borde al ~38%),
+         texto en el tono oscuro de la tienda para leerse perfecto.
+         La activa va en el color SATURADO de su tienda con texto
+         blanco; «Todas» activa conserva el verde de marca #1B9E4B. — */
       .chip{border:1px solid transparent;background:var(--surface-2);font-weight:600}
-      .chip:not([data-store="todas"]){border-color:transparent}
+      .chip[data-store="todas"]{background:var(--surface-2);color:var(--ink)}
+      .chip:not([data-store="todas"]){background:var(--sc-bg);background:color-mix(in srgb,var(--sc) 19%,transparent);border-color:color-mix(in srgb,var(--sc) 38%,transparent);color:var(--sc-ink,var(--ink));font-weight:700}
+      .chip:not([data-store="todas"])::before{background:var(--sc)}
       .chip[aria-pressed="true"]{background:var(--amber-bright);border-color:var(--amber-bright);color:#fff}
-      .chip:not([data-store="todas"])[aria-pressed="true"]{background:var(--amber-bright);border-color:var(--amber-bright);color:#fff}
+      .chip:not([data-store="todas"])[aria-pressed="true"]{background:var(--sc);border-color:var(--sc);color:#fff}
       .chip:not([data-store="todas"])[aria-pressed="true"]::before{background:#fff}
+      .chip[data-store="Plaza Loiza"][aria-pressed="true"],.chip[data-store="Famcoop"][aria-pressed="true"]{color:#422006}
+      .chip[data-store="Plaza Loiza"][aria-pressed="true"]::before,.chip[data-store="Famcoop"][aria-pressed="true"]::before{background:#422006}
       .of-cat{border:1px solid transparent;background:var(--surface-2)}
       .fchip{border:1px solid transparent}
+      .fchip[data-follow="store"]{background:var(--sc-bg,var(--amber-soft));background:color-mix(in srgb,var(--sc,var(--amber-bright)) 19%,transparent);border-color:color-mix(in srgb,var(--sc,var(--amber-bright)) 38%,transparent);color:var(--sc-ink,var(--amber-ink))}
       .fchip.star{background:var(--amber-bright);border-color:var(--amber-bright);color:#fff}
       .rchip{border:1px solid transparent;background:var(--surface)}
       .correct-chip{border:1px solid var(--line-strong);box-shadow:none}
@@ -662,7 +704,8 @@
       .choice-badge{border-radius:999px;padding:5px 12px;font-size:.76rem}
       .ganga{border-radius:999px;padding:5px 12px}
       .of-badge{border-radius:999px;padding:4px 10px}
-      .tag.store{border-color:transparent}
+      .tag.store{background:var(--sc-bg,var(--navy-soft));background:color-mix(in srgb,var(--sc,var(--line-strong)) 19%,transparent);border-color:color-mix(in srgb,var(--sc,transparent) 38%,transparent);color:var(--sc-ink,var(--navy))}
+      .vig .store-name-chip{background:var(--sc-bg,transparent);background:color-mix(in srgb,var(--sc,transparent) 19%,transparent);border-color:color-mix(in srgb,var(--sc,transparent) 38%,transparent);color:var(--sc-ink,inherit)}
       /* — Precios en verde; el rojo solo vive en .disc / .ganga / .of-badge — */
       .offer .big-price{color:var(--amber-strong)}
       .of-price .big{color:var(--amber-strong)}
@@ -691,6 +734,10 @@
       @media(min-width:700px){.sheet{border-radius:28px}}
       .sheet .close{border:none;background:var(--surface-2)}
       @media(prefers-color-scheme:dark){
+        .chip:not([data-store="todas"]){background:color-mix(in srgb,var(--sc) 27%,transparent);border-color:color-mix(in srgb,var(--sc) 45%,transparent)}
+        .fchip[data-follow="store"]{background:color-mix(in srgb,var(--sc,var(--amber-bright)) 27%,transparent);border-color:color-mix(in srgb,var(--sc,var(--amber-bright)) 45%,transparent)}
+        .tag.store{background:color-mix(in srgb,var(--sc,var(--line-strong)) 27%,transparent);border-color:color-mix(in srgb,var(--sc,transparent) 45%,transparent)}
+        .vig .store-name-chip{background:color-mix(in srgb,var(--sc,transparent) 27%,transparent);border-color:color-mix(in srgb,var(--sc,transparent) 45%,transparent)}
         .chip[aria-pressed="true"],.chip:not([data-store="todas"])[aria-pressed="true"]{color:#0B1F12}
         .chip:not([data-store="todas"])[aria-pressed="true"]::before{background:#0B1F12}
         .mode-btn[aria-pressed="true"]{color:#0B1F12}
@@ -1478,7 +1525,7 @@ var HARVEST3 = [
         var h = '<div class="follow-chips"><span class="follow-lbl">Sigue filtrando:</span>' +
           '<button class="fchip star" type="button" data-follow="cheapest" data-seq="' + searchSeq + '">★ Lo más barato</button>';
         storesSeen.forEach(function (s) {
-          h += '<button class="fchip" type="button" data-follow="store" data-seq="' + searchSeq + '" data-store-name="' + esc(s) + '">Solo ' + esc(s) + "</button>";
+          h += '<button class="fchip ' + storeClass(s) + '" type="button" data-follow="store" data-seq="' + searchSeq + '" data-store-name="' + esc(s) + '">Solo ' + esc(s) + "</button>";
         });
         if (totalCount > 6) h += '<button class="fchip" type="button" data-follow="all" data-seq="' + searchSeq + '">Ver las ' + totalCount + " opciones</button>";
         return h + "</div>";
@@ -2439,7 +2486,7 @@ var HARVEST3 = [
           ? '<div class="of-reg">Precio regular: <s>' + regDisplay(o) + "</s></div>"
           : '<div class="of-reg">Precio del shopper · la fuente no publica precio regular</div>';
         return '<article class="of-card ' + storeClass(o.store) + '">' +
-          '<div class="of-top">' + badge + (pct != null && pct >= 50 ? '<span class="ganga">¡GANGA!</span>' : "") + '<span class="tag store">' + esc(o.store) + "</span></div>" +
+          '<div class="of-top">' + badge + (pct != null && pct >= 50 ? '<span class="ganga">¡GANGA!</span>' : "") + '<span class="tag store ' + storeClass(o.store) + '">' + esc(o.store) + "</span></div>" +
           '<div class="name">' + esc(o.name) + "</div>" +
           '<div class="of-price"><span class="' + (o.priceLabel ? "big small" : "big") + '">' + big + "</span>" + (o.priceLabel ? "" : '<span class="unit">' + esc(o.unit) + "</span>") + "</div>" +
           (o.priceLabel ? '<div class="of-reg">Por unidad: <strong>' + money(o.eff != null ? o.eff : o.price) + "</strong></div>" : "") +
