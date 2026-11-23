@@ -1,0 +1,17 @@
+{
+  "name": "Shopper.pr",
+  "short_name": "Shopper.pr",
+  "description": "Compara especiales de supermercados y farmacias de Puerto Rico por pueblo",
+  "lang": "es-PR",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fdf7f2",
+  "theme_color": "#f04a38",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

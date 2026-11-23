@@ -4,7 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
+    <meta name="theme-color" content="#ef4433" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171114" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Shopper.pr" />
+    <meta name="application-name" content="Shopper.pr" />
+    <meta name="description" content="Shopper.pr — pregunta en español y compara los especiales vigentes de los supermercados de Puerto Rico." />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <title>Shopper.pr</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -418,6 +428,20 @@
       .tab .tab-total{font-size:.7rem;font-weight:800;color:var(--amber-strong);line-height:1.1;min-height:.78rem}
       .tab .tab-count{position:absolute;top:1px;left:calc(50% + 3px);background:var(--amber-bright);color:#fff;border-radius:999px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;font-size:.7rem;font-weight:800;line-height:1}
       .tab .tab-count[hidden]{display:none}
+      /* ===== PWA — barra fina de instalación: solo aparece cuando la app
+         es instalable (beforeinstallprompt) o en Safari iOS sin instalar;
+         si ya corre en modo standalone, nunca se muestra. ===== */
+      .install-bar{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:9px 10px 9px 16px;background:var(--navy);color:#fff;position:relative;z-index:3}
+      @media(prefers-color-scheme:dark){.install-bar{background:#f3e9e2;color:#2b2126}}
+      .install-bar[hidden]{display:none}
+      .install-bar .ib-txt{flex:1 1 180px;min-width:0;font-size:.86rem;line-height:1.4}
+      .install-bar .ib-txt strong{font-weight:800}
+      .install-bar .ib-how{flex:1 1 100%;margin:2px 0 4px;font-size:.85rem;line-height:1.55}
+      .install-bar .ib-how[hidden]{display:none}
+      .install-btn{flex:0 0 auto;min-height:42px;padding:9px 16px;border-radius:999px;border:none;background:var(--amber-bright);color:#fff;font-weight:800;font-size:.87rem;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow-sm)}
+      .install-btn svg{width:17px;height:17px;fill:currentColor;flex:0 0 17px}
+      .install-btn:active{transform:scale(.98)}
+      .install-x{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:transparent;color:inherit;display:grid;place-items:center;font-size:1rem}
       /* ===== Mi lista: ahorro acumulado y botón WhatsApp ===== */
       .list-save{margin-top:12px;background:var(--surface-2);border:1px solid var(--line);border-left:5px solid #12805c;border-radius:12px;padding:11px 13px;font-size:.92rem;line-height:1.5}
       .list-save strong{color:#12805c}
@@ -676,6 +700,13 @@
             <svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
           </button>
         </form>
+      </div>
+
+      <div class="install-bar" id="installBar" hidden>
+        <span class="ib-txt"><strong>Shopper.pr como app:</strong> instálala y abrirá siempre en pantalla completa, con micrófono y tu lista a mano — sin depender de Messenger.</span>
+        <button class="install-btn" id="installBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Instalar app</button>
+        <button class="install-x" id="installDismiss" type="button" aria-label="Descartar la invitación a instalar">✕</button>
+        <p class="ib-how" id="installHow" hidden>En iPhone o iPad: toca <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba) y luego <strong>«Añadir a pantalla de inicio»</strong>. Shopper.pr quedará como una app más en tu pantalla.</p>
       </div>
 
       <nav class="tabbar" aria-label="Secciones de la aplicación">
@@ -1151,6 +1182,129 @@ var HARVEST3 = [
         return { live: live, expired: expired, blockedLive: blockedLive };
       }
 
+      /* ===== BÚSQUEDA DIFUSA — red de seguridad para el dictado por voz =====
+         Idea de MiniSearch/FlexSearch en versión compacta propia, sin
+         librerías ni CDN. SOLO se consulta cuando el pareo exacto de
+         searchOffers devolvió cero resultados (ni vigentes, ni vencidos,
+         ni bloqueados por pueblos): nunca sustituye ni reordena un pareo
+         exacto. Por cada palabra sin pareo busca en el vocabulario del
+         catálogo (nombres + q + keys, con la misma normalización) usando
+         un pliegue fonético español (k/qu→c dura, c ante e/i y z→s, v→b,
+         h muda fuera, dobles colapsadas: «arroz»→«aros», «aceite»→
+         «aseite», «huevos»→«uebos»), distancia de edición (≤2 en palabras
+         de 5+ letras, ≤1 en las más cortas) o similitud de bigramas alta.
+         Solo actúa si hay UN ganador claro por palabra (mejor distancia,
+         o igual distancia con bigramas claramente mejores); con ambigüedad
+         devuelve null y manda el comportamiento de siempre («Sin especial
+         esta semana» / no encontré), nunca adivina entre dos productos. */
+      function foldEs(w) {
+        var s = String(w).replace(/qu/g, "k");
+        s = s.replace(/c(?=[ei])/g, "s").replace(/c/g, "k");
+        s = s.replace(/z/g, "s").replace(/v/g, "b").replace(/h/g, "");
+        s = s.replace(/(.)\1+/g, "$1");
+        return s;
+      }
+      function editDist(a, b, cap) {
+        var n = a.length, m = b.length;
+        if (Math.abs(n - m) > cap) return cap + 1;
+        var prev = [], cur = [], i, j;
+        for (j = 0; j <= m; j++) prev[j] = j;
+        for (i = 1; i <= n; i++) {
+          cur[0] = i;
+          var rowMin = cur[0];
+          for (j = 1; j <= m; j++) {
+            var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+            if (cur[j] < rowMin) rowMin = cur[j];
+          }
+          if (rowMin > cap) return cap + 1;
+          var tmp = prev; prev = cur; cur = tmp;
+        }
+        return prev[m];
+      }
+      function bigramDice(a, b) {
+        if (a === b) return 1;
+        if (a.length < 2 || b.length < 2) return 0;
+        var A = {}, B = {}, i, g, inter = 0;
+        for (i = 0; i < a.length - 1; i++) { g = a.slice(i, i + 2); A[g] = (A[g] || 0) + 1; }
+        for (i = 0; i < b.length - 1; i++) { g = b.slice(i, i + 2); B[g] = (B[g] || 0) + 1; }
+        Object.keys(A).forEach(function (k) { if (B[k]) inter += Math.min(A[k], B[k]); });
+        return (2 * inter) / ((a.length - 1) + (b.length - 1));
+      }
+      function fuzzyCandidates(tok, vocab) {
+        var f = foldEs(tok), out = [];
+        for (var i = 0; i < vocab.length; i++) {
+          var v = vocab[i];
+          if (v.f.charAt(0) !== f.charAt(0)) continue;
+          if (Math.abs(v.f.length - f.length) > 2) continue;
+          var maxLen = Math.max(f.length, v.f.length);
+          var cap = maxLen >= 5 ? 2 : 1;
+          var d = editDist(f, v.f, cap + 1);
+          var dice = bigramDice(f, v.f);
+          if (d <= cap || dice >= (maxLen >= 5 ? 0.6 : 0.7)) out.push({ w: v.w, d: d, dice: dice, n: v.n || 1 });
+        }
+        out.sort(function (a, b) { if (a.d !== b.d) return a.d - b.d; return b.dice - a.dice; });
+        return out;
+      }
+      function fuzzyClearWinner(cands) {
+        if (!cands.length) return null;
+        if (cands.length === 1) return cands[0];
+        var b = cands[0], s = cands[1];
+        if (b.d < s.d) return b;
+        if (b.d === s.d && b.dice - s.dice >= 0.25) return b;
+        // Empate total de forma («aris» queda a la misma distancia de
+        // «arroz» que de «anis»): solo lo rompe una dominancia abrumadora
+        // de catálogo — el ganador aparece en al menos 8 ofertas y en 4×
+        // más ofertas que el segundo. Entre dos productos de peso parecido
+        // NO se adivina: se devuelve null y manda el comportamiento usual.
+        if (b.d === s.d && b.n >= 8 && b.n >= 4 * Math.max(1, s.n)) return b;
+        return null;
+      }
+      var FUZZ_VOCAB = null, FUZZ_WORDS = null;
+      function fuzzVocab() {
+        if (FUZZ_VOCAB) return FUZZ_VOCAB;
+        // n = en cuántas ofertas aparece la palabra (desempate por peso
+        // de catálogo en fuzzyClearWinner, nunca como pareo por sí solo).
+        var counts = {};
+        OFFERS.forEach(function (o) {
+          var perOffer = {};
+          norm(o.name + " " + (o.q || "") + " " + (o.keys || []).join(" ")).split(" ").forEach(function (w) {
+            if (w && !perOffer[w]) { perOffer[w] = 1; counts[w] = (counts[w] || 0) + 1; }
+          });
+        });
+        var seen = {}, list = [], words = [];
+        Object.keys(counts).forEach(function (w) {
+          if (w.length < 3 || seen[w] || STOPQ[w] || /^\d/.test(w)) return;
+          seen[w] = 1; words.push(w); list.push({ w: w, f: foldEs(w), n: counts[w] });
+        });
+        FUZZ_VOCAB = list; FUZZ_WORDS = words;
+        return list;
+      }
+      // Devuelve { res, corrected, corrections } o null si no hay una
+      // corrección clara que produzca resultados reales en searchOffers.
+      function fuzzySearchOffers(text) {
+        var toks = queryTokens(text);
+        if (!toks.length || toks.length > 4) return null;
+        var vocab = fuzzVocab();
+        var changed = false, fixed = [], corrections = [];
+        for (var i = 0; i < toks.length; i++) {
+          var tk = toks[i];
+          if (tokenHit(tk, FUZZ_WORDS)) { fixed.push(tk); continue; }
+          var win = fuzzyClearWinner(fuzzyCandidates(tk, vocab));
+          if (!win) return null;
+          fixed.push(win.w); changed = true;
+          corrections.push({ from: tk, to: win.w });
+        }
+        if (!changed) return null;
+        var corrected = fixed.join(" ");
+        var res = searchOffers(corrected);
+        if (!res.live.length && !res.expired.length && !res.blockedLive) return null;
+        return { res: res, corrected: corrected, corrections: corrections };
+      }
+      function fuzzyPairsText(corrections) {
+        return corrections.map(function (c) { return "«" + c.from + "» por «" + c.to + "»"; }).join(", ");
+      }
+
       function storeOffers(name) {
         if (!isStoreAllowed(name)) return [];
         return OFFERS.filter(function (o) { return o.store === name && daysLeft(o.until) >= 0; })
@@ -1574,6 +1728,54 @@ var HARVEST3 = [
         if (content && matched / content < 0.6) return null;
         return items;
       }
+      /* Red de seguridad DIFUSA de la segmentación: si la lista dictada de
+         corrido no segmentó (una palabra llegó mal transcrita: «aris
+         lechi kafe»), se corrige palabra por palabra contra el vocabulario
+         del propio diccionario de segmentación — con la misma regla de UN
+         ganador claro de la búsqueda difusa — y se vuelve a segmentar el
+         texto corregido. Si alguna palabra no tiene ganador claro, o el
+         texto corregido tampoco segmenta en 2+ ítems, devuelve null y el
+         mensaje sigue por su ruta normal. La segmentación exacta no se
+         toca: esto solo corre cuando aquella devolvió null. */
+      function fuzzySegmentText(raw) {
+        if (/[,;\n]/.test(raw)) return null;
+        var t = norm(raw);
+        if (!t) return null;
+        var toks = t.split(" ");
+        if (toks.length < 2 || toks.length > 14) return null;
+        // La guardia de preguntas se aplica al texto ORIGINAL: si el
+        // dictado trae una palabra de pregunta («hay», «cuesta»,
+        // «especial»…), es una pregunta, no una lista — jamás se
+        // «corrige» esa palabra para colar la segmentación.
+        for (var q = 0; q < toks.length; q++) { if (LIST_QGUARD[toks[q]]) return null; }
+        var dict = buildListDict();
+        var dictWords = {}, dictFreq = {};
+        Object.keys(dict.phrases).forEach(function (p) {
+          var seenW = {};
+          dict.phrases[p].forEach(function (w) {
+            dictWords[w] = 1;
+            if (!seenW[w]) { seenW[w] = 1; dictFreq[w] = (dictFreq[w] || 0) + 1; }
+          });
+        });
+        var vocab = Object.keys(dictWords).map(function (w) { return { w: w, f: foldEs(w), n: dictFreq[w] || 1 }; });
+        var changed = false, fixed = [], corrections = [];
+        for (var i = 0; i < toks.length; i++) {
+          var tk = toks[i];
+          if (LIST_FILLER[tk] || /^\d{1,2}$/.test(tk) || /^x\d{1,2}$/.test(tk) || dictWords[tk]) { fixed.push(tk); continue; }
+          var hasSeg = false;
+          for (var v = 0; v < vocab.length; v++) { if (segTokenEq(vocab[v].w, tk)) { hasSeg = true; break; } }
+          if (hasSeg) { fixed.push(tk); continue; }
+          var win = fuzzyClearWinner(fuzzyCandidates(tk, vocab));
+          if (!win) return null;
+          fixed.push(win.w); changed = true;
+          corrections.push({ from: tk, to: win.w });
+          if (corrections.length > 3) return null;
+        }
+        if (!changed) return null;
+        var items = segmentRunOnList(fixed.join(" "));
+        if (!items) return null;
+        return { items: items, corrected: fixed.join(" "), corrections: corrections };
+      }
       // Receta DICHA ENTERA («arroz con gandules», «arroz con dulce»): si el
       // texto completo — fuera verbos de relleno al inicio — es el nombre de
       // un plato conocido de 2+ palabras, manda la ruta de Recetas, no la
@@ -1614,6 +1816,13 @@ var HARVEST3 = [
         var seq = listSeq;
         var resolved = items.map(function (it) {
           var res = searchOffers(it.query);
+          // Red difusa por ítem: si el pareo exacto no encontró nada de
+          // este ítem (ej. llegó mal dictado en la lista), se intenta la
+          // corrección con ganador claro antes de declararlo sin especial.
+          if (!res.live.length && !res.expired.length && !res.blockedLive) {
+            var fzItem = fuzzySearchOffers(it.query);
+            if (fzItem) res = fzItem.res;
+          }
           var sorted = res.live.slice().sort(function (a, b) { return effOf(a) - effOf(b); });
           var best = sorted[0] || null;
           var second = null;
@@ -2332,12 +2541,28 @@ var HARVEST3 = [
         // salen 2+ productos distintos; con 1 (o ninguno) el mensaje sigue
         // por su ruta normal de pregunta o búsqueda.
         var runOnItems = segmentRunOnList(raw);
+        var runOnNoteHtml = "";
+        if (!runOnItems) {
+          var segFix = fuzzySegmentText(raw);
+          if (segFix) {
+            runOnItems = segFix.items;
+            runOnNoteHtml = "<p>No segmentó tal cual; lo entendí como <strong>«" + esc(segFix.corrected) + "»</strong> (corregí " + esc(fuzzyPairsText(segFix.corrections)) + ").</p>";
+          }
+        }
         if (runOnItems) {
-          botReply("<p>Te leo eso como <strong>una lista de " + runOnItems.length + " productos</strong> — aquí va cada uno donde está más barato esta semana:</p>" + listCompareHtml(runOnItems, false));
+          botReply(runOnNoteHtml + "<p>Te leo eso como <strong>una lista de " + runOnItems.length + " productos</strong> — aquí va cada uno donde está más barato esta semana:</p>" + listCompareHtml(runOnItems, false));
           return;
         }
 
         var res = searchOffers(raw);
+        // Búsqueda DIFUSA: solo si el pareo exacto no encontró nada en
+        // ninguna capa de resultado (ni vigente, ni vencido, ni bloqueado
+        // por el filtro de pueblos) y hay una corrección con ganador claro.
+        var fuzzyFix = null;
+        if (!res.live.length && !res.expired.length && !res.blockedLive) {
+          var fz = fuzzySearchOffers(raw);
+          if (fz) { res = fz.res; fuzzyFix = fz; }
+        }
         var wantCompare = /mas barato|menor precio|mejor precio|compara|comparar|donde conviene|donde esta/.test(t);
 
         if (res.live.length) {
@@ -2346,6 +2571,7 @@ var HARVEST3 = [
           var totalLive = res.live.length;
           var shownRes = res.live.slice(0, 6);
           var html = "";
+          if (fuzzyFix) html += "<p>No apareció con esas palabras exactas; lo entendí como <strong>«" + esc(fuzzyFix.corrected) + "»</strong> (corregí " + esc(fuzzyPairsText(fuzzyFix.corrections)) + "). Si era otra cosa, escríbelo de nuevo:</p>";
           if (wantCompare && totalLive > 1) {
             html += hasBest
               ? "<p>Comparé las tiendas con shopper vigente entre precios comparables (misma unidad: libra con libra, lata con lata) y agrupé por tienda. Lo marcado con ★ es el más barato de su grupo comparable — las cenas completas no se comparan contra precios por libra:</p>"
@@ -3112,6 +3338,55 @@ var HARVEST3 = [
         "<p>Y con la pestaña <strong>Comparar</strong> de abajo ves la <strong>canasta común de la semana</strong> entre Econo, Selectos, SuperMax, Pueblo y Amigo: el total por tienda lado a lado, solo con productos comparables de verdad — donde una tienda no tiene el producto, la celda lo dice y no se inventa. La pestaña <strong>Mi lista</strong> lleva tu total siempre visible, como el carrito de Walmart, y desde la lista puedes enviarla por <strong>WhatsApp</strong> ya escrita.</p>" +
         "<p>Escríbeme abajo lo que buscas — por ejemplo «¿dónde está la cena de pernil más barata?» o «¿hay LEGO en especial?». <em>El catálogo de hoy trae <strong>4,086 productos con precio</strong> verificados el 22-nov-2026: la cosecha de Econo, Selectos y SuperMax, las 27 tarjetas originales con su página de detalle, la cosecha ampliada de 20 cadenas (1,296 productos nuevos), la cosecha complementaria completa de las 8 cadenas que faltaban (1,356 productos nuevos, deduplicados contra lo ya cargado) y el <strong>shopper completo de Plaza Tu Supermercado (169 productos)</strong>, transcrito de las págs. 1–7 en ShoppersDePuertoRico (Capa 4) porque Shop.pr solo expone su página 1, más el inserto de bultos de su pág. 8 como tienda propia: <strong>Somos Tu Cash &amp; Carry (29 productos, solo Patillas)</strong>, el <strong>Weekly Ad oficial de Walgreens (89 ofertas con precio, Capa 2)</strong> y el <strong>shopper completo de Comercio Cash &amp; Carry de Ponce (352 productos, Capa 4)</strong>. Cuando la fuente publica precio regular, lo muestro; donde no hay, no se inventa ninguno.</em></p>", true);
       if (restoredNote) addBot(restoredNote, true);
+    </script>
+    <script>
+      // ===== PWA — service worker + «Instalar app» =====
+      // sw.js y manifest.json viven junto a este index.html en el repo
+      // público (GitHub Pages). Donde sw.js no exista — como la vista
+      // previa de Muse — el registro falla EN SILENCIO: sin errores
+      // visibles ni mensajes al usuario.
+      (function () {
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () {
+            try { navigator.serviceWorker.register("sw.js").catch(function () {}); } catch (e) {}
+          });
+        }
+        var bar = document.getElementById("installBar");
+        if (!bar) return;
+        var btn = document.getElementById("installBtn");
+        var how = document.getElementById("installHow");
+        var dismissBtn = document.getElementById("installDismiss");
+        var deferred = null, dismissed = false;
+        function isStandalone() {
+          return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+        }
+        function show() { if (!dismissed && !isStandalone()) bar.hidden = false; }
+        function hide() { bar.hidden = true; }
+        window.addEventListener("beforeinstallprompt", function (e) {
+          e.preventDefault();
+          deferred = e;
+          show();
+        });
+        window.addEventListener("appinstalled", function () { deferred = null; hide(); });
+        if (btn) btn.addEventListener("click", function () {
+          if (deferred) {
+            var d = deferred; deferred = null;
+            try { d.prompt(); } catch (e) {}
+            if (d.userChoice && d.userChoice.then) d.userChoice.then(function () { hide(); });
+            else hide();
+          } else if (how) {
+            // iOS no dispara beforeinstallprompt: el botón enseña el camino.
+            how.hidden = !how.hidden;
+          }
+        });
+        if (dismissBtn) dismissBtn.addEventListener("click", function () { dismissed = true; hide(); });
+        // iOS Safari sin instalar: no hay evento, se muestra la invitación
+        // con las instrucciones de «Compartir → Añadir a pantalla de inicio».
+        var ua = navigator.userAgent || "";
+        var isIos = /iphone|ipad|ipod/i.test(ua);
+        var isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+        if (isIos && isSafari && !isStandalone()) show();
+      })();
     </script>
   </body>
 </html>
