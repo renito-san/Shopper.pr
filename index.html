@@ -465,9 +465,11 @@
       .tab .tab-total{font-size:.7rem;font-weight:800;color:var(--amber-strong);line-height:1.1;min-height:.78rem}
       .tab .tab-count{position:absolute;top:1px;left:calc(50% + 3px);background:var(--amber-bright);color:#fff;border-radius:999px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;font-size:.7rem;font-weight:800;line-height:1}
       .tab .tab-count[hidden]{display:none}
-      /* ===== PWA — barra fina de instalación: solo aparece cuando la app
-         es instalable (beforeinstallprompt) o en Safari iOS sin instalar;
-         si ya corre en modo standalone, nunca se muestra. ===== */
+      /* ===== PWA — barra fina de instalación: aparece cuando la app es
+         instalable (beforeinstallprompt), en Safari iOS o en Android sin
+         ese evento; nunca en modo standalone, nunca tras cerrarla con la
+         × (cierre persistente) y nunca dentro del navegador de otra app
+         (ahí va el aviso de Safari, más abajo). ===== */
       .install-bar{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:9px 10px 9px 16px;background:var(--navy);color:#fff;position:relative;z-index:3}
       @media(prefers-color-scheme:dark){.install-bar{background:#E7F2EA;color:#14231A}}
       .install-bar[hidden]{display:none}
@@ -479,6 +481,19 @@
       .install-btn svg{width:17px;height:17px;fill:currentColor;flex:0 0 17px}
       .install-btn:active{transform:scale(.98)}
       .install-x{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:transparent;color:inherit;display:grid;place-items:center;font-size:1rem}
+      /* Resaltado breve de la línea de pasos cuando el botón «Instalar app»
+         no tiene prompt nativo (iPhone): la hace notar sin mover el layout. */
+      .install-bar .ib-how.flash{border-radius:8px;animation:ibflash 1.7s ease}
+      @keyframes ibflash{0%,100%{background:transparent}20%,65%{background:color-mix(in srgb,var(--amber-bright) 32%,transparent)}}
+      @media(prefers-reduced-motion:reduce){.install-bar .ib-how.flash{animation:none;background:color-mix(in srgb,var(--amber-bright) 32%,transparent)}}
+      /* ===== Aviso Safari — solo iPhone/iPad dentro del navegador de otra
+         app (WhatsApp/Facebook/Messenger/Instagram), donde instalar es
+         imposible: discreto, descartable, y el descarte se recuerda. ===== */
+      .safari-note{flex:0 0 auto;display:flex;align-items:center;gap:8px 10px;padding:8px 10px 8px 16px;background:var(--surface-2);color:var(--ink-soft);border-top:1px solid var(--line);font-size:.82rem;line-height:1.45;position:relative;z-index:3}
+      .safari-note[hidden]{display:none}
+      .safari-note .sn-txt{flex:1 1 auto;min-width:0}
+      .safari-note .sn-txt strong{color:var(--ink)}
+      .safari-note .install-x{color:var(--ink-soft)}
       /* ===== Barra de corrección propia — sobre el composer, mismo patrón
          que la barra de instalación: fina, descartable, solo aparece
          mientras se escribe y hay una palabra con corrección clara. ===== */
@@ -952,6 +967,12 @@
         <button class="install-btn" id="installBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Instalar app</button>
         <button class="install-x" id="installDismiss" type="button" aria-label="Descartar la invitación a instalar">✕</button>
         <p class="ib-how" id="installHow" hidden>En iPhone o iPad: toca <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba) y luego <strong>«Añadir a pantalla de inicio»</strong>. Shopper.pr quedará como una app más en tu pantalla.</p>
+        <p class="ib-how" id="installHowAndroid" hidden>En Android: toca el menú <strong>⋮</strong> de tu navegador y luego <strong>«Instalar app»</strong> (o «Añadir a pantalla de inicio»). Shopper.pr quedará como una app más en tu pantalla.</p>
+      </div>
+
+      <div class="safari-note" id="safariNote" hidden>
+        <span class="sn-txt">Estás viendo Shopper.pr dentro de otra app, y desde aquí no se puede instalar. Para instalarla, <strong>abre este enlace en Safari</strong>.</span>
+        <button class="install-x" id="safariNoteDismiss" type="button" aria-label="Descartar el aviso de abrir en Safari">✕</button>
       </div>
 
       <nav class="tabbar" aria-label="Secciones de la aplicación">
@@ -4025,12 +4046,30 @@ var HARVEST3 = [
         if (!bar) return;
         var btn = document.getElementById("installBtn");
         var how = document.getElementById("installHow");
+        var howAndroid = document.getElementById("installHowAndroid");
         var dismissBtn = document.getElementById("installDismiss");
-        var deferred = null, dismissed = false;
+        var safariNote = document.getElementById("safariNote");
+        var safariDismissBtn = document.getElementById("safariNoteDismiss");
+        // Reglas de la tarjeta (las validadas en ChekEAki):
+        // 1) instalada (standalone) → nunca sale. 2) cerrada con la × →
+        //    no vuelve a salir en este teléfono: el cierre se guarda en
+        //    localStorage y se consulta antes de cada intento de mostrar.
+        var LS_DISMISS = "shopperpr-install-dismissed";
+        var LS_SAFARI = "shopperpr-safari-note-dismissed";
+        function lsGet(k) { try { return window.localStorage.getItem(k) === "1"; } catch (e) { return false; } }
+        function lsSet(k) { try { window.localStorage.setItem(k, "1"); } catch (e) {} }
+        var deferred = null, dismissed = lsGet(LS_DISMISS);
+        var ua = navigator.userAgent || "";
+        var isIos = /iphone|ipad|ipod/i.test(ua);
+        var isAndroid = /android/i.test(ua);
+        var isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+        // 5) Navegador dentro de otra app (WhatsApp, Facebook, Messenger,
+        //    Instagram…): instalar desde ahí es imposible.
+        var inAppBrowser = /fban|fbav|fb_iab|instagram|whatsapp/i.test(ua);
         function isStandalone() {
           return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
         }
-        function show() { if (!dismissed && !isStandalone()) bar.hidden = false; }
+        function show() { if (!dismissed && !isStandalone() && !inAppBrowser) bar.hidden = false; }
         function hide() { bar.hidden = true; }
         window.addEventListener("beforeinstallprompt", function (e) {
           e.preventDefault();
@@ -4038,6 +4077,15 @@ var HARVEST3 = [
           show();
         });
         window.addEventListener("appinstalled", function () { deferred = null; hide(); });
+        // 4) Sin prompt nativo, el botón enseña la línea de pasos de la
+        //    plataforma y la RESALTA un momento para que se note.
+        function flash(el) {
+          if (!el) return;
+          el.classList.remove("flash");
+          void el.offsetWidth;
+          el.classList.add("flash");
+          setTimeout(function () { el.classList.remove("flash"); }, 1800);
+        }
         if (btn) btn.addEventListener("click", function () {
           if (deferred) {
             var d = deferred; deferred = null;
@@ -4045,18 +4093,35 @@ var HARVEST3 = [
             try { showInstallPrompt.call(d); } catch (e) {}
             if (d.userChoice && d.userChoice.then) d.userChoice.then(function () { hide(); });
             else hide();
-          } else if (how) {
-            // iOS no dispara beforeinstallprompt: el botón enseña el camino.
-            how.hidden = !how.hidden;
+          } else {
+            // 3) Línea de pasos según plataforma: iOS → Compartir →
+            //    «Añadir a pantalla de inicio»; Android → menú ⋮ →
+            //    «Instalar app».
+            var target = isIos ? how : howAndroid;
+            if (how && target !== how) how.hidden = true;
+            if (howAndroid && target !== howAndroid) howAndroid.hidden = true;
+            if (target) { target.hidden = false; flash(target); }
           }
         });
-        if (dismissBtn) dismissBtn.addEventListener("click", function () { dismissed = true; hide(); });
+        if (dismissBtn) dismissBtn.addEventListener("click", function () { dismissed = true; lsSet(LS_DISMISS); hide(); });
         // iOS Safari sin instalar: no hay evento, se muestra la invitación
         // con las instrucciones de «Compartir → Añadir a pantalla de inicio».
-        var ua = navigator.userAgent || "";
-        var isIos = /iphone|ipad|ipod/i.test(ua);
-        var isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
         if (isIos && isSafari && !isStandalone()) show();
+        // Android sin beforeinstallprompt (p. ej. Firefox): la tarjeta sale
+        // igual tras dar un margen al evento, y el botón enseña los pasos.
+        if (isAndroid && !isStandalone()) {
+          window.addEventListener("load", function () { setTimeout(show, 900); });
+        }
+        // 5) En iPhone/iPad dentro de otra app la tarjeta NO sale; en su
+        //    lugar, el aviso discreto de abrir en Safari (descartable, y
+        //    el descarte también se recuerda).
+        if (isIos && inAppBrowser && !isStandalone() && safariNote && !lsGet(LS_SAFARI)) {
+          safariNote.hidden = false;
+        }
+        if (safariDismissBtn) safariDismissBtn.addEventListener("click", function () {
+          lsSet(LS_SAFARI);
+          if (safariNote) safariNote.hidden = true;
+        });
       })();
     </script>
   </body>
